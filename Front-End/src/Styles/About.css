@@ -1,0 +1,92 @@
+.content {
+  flex: 1 1 45%;
+  transition: transform 0.4s ease;
+  box-sizing: border-box;
+}
+
+.content:hover, .image:hover {
+  transform: translateY(-10px);
+}
+
+.container h2{
+  color: #fff;
+  font-weight: 600;
+}
+
+.U-text{
+  color: #f6020b;
+}
+
+
+#about-us-what {
+  text-align: center;
+  padding: 50px 0 50px 0;
+  color: #fff;
+  /* background: url('/src/Images/boba7.png') no-repeat center center/cover; */
+  max-width: 2000px;
+  background-color: rgb(6, 111, 197);
+  margin: 0 auto;
+}
+
+#about-us-what h2 {
+  font-size: 36px;
+  color: #fff;
+  font-weight: bold;
+  margin-bottom: 30px;
+}
+
+#features {
+  display: flex;
+  justify-content: space-around;
+}
+
+#features .feature {
+  text-align: center;
+}
+
+#features .feature i {
+  font-size: 60px;
+  margin-bottom: 15px;
+}
+
+#features .feature p {
+  font-size: 18px;
+  margin: 0;
+}
+
+@media (max-width: 1200px) {
+  .wrapper {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .content h2 {
+    font-size: 25px;
+  }
+}
+
+@media (max-width: 768px) {
+
+  .content h2 {
+    font-size: 25px;
+  }
+
+  .content .btn {
+    font-size: 16px;
+    padding: 12px 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .heading h1 {
+    font-size: 40px;
+  }
+
+  .content h2 {
+    font-size: 22px;
+  }
+
+  .content p {
+    font-size: 16px;
+  }
+}
