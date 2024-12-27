@@ -21,17 +21,13 @@ const Admin = () => {
   const token = localStorage.getItem('token');
 
   useEffect(() => {
+    // Fetch products
     fetch('https://find-item.vercel.app/api/products')
       .then(response => response.json())
-      .then(data => {
-        const productsWithImages = data.map(product => ({
-          ...product,
-          image: `https://find-item.vercel.app/uploads/${product.image}`
-        }));
-        setProducts(productsWithImages);
-      })
+      .then(data => setProducts(data))
       .catch(error => console.error('Error fetching products:', error));
 
+    // Fetch bookings
     fetch('https://find-item.vercel.app/api/bookings')
       .then(response => response.json())
       .then(data => setBookings(data))
@@ -84,26 +80,33 @@ const handleSaveProduct = async () => {
 };
 
 
- const handleAddProduct = () => {
+ const handleAddProduct = async () => {
   const formData = new FormData();
   formData.append('name', newProduct.name);
   formData.append('category', newProduct.category);
   formData.append('price', newProduct.price);
   formData.append('image', newProduct.image); // Adding the image file
 
-  fetch('https://find-item.vercel.app/api/products/add', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`  // Include the token for authentication
-    },
-    body: formData,  // Send the formData as the body of the request
-  })
-    .then(response => response.json())
-    .then(data => {
+  try {
+    const response = await fetch('https://find-item.vercel.app/api/products', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`  // Include the token for authentication
+      },
+      body: formData,  // Send the formData as the body of the request
+    });
+    if (response.ok) {
+      const data = await response.json();
       setProducts([...products, data]);  // Update the products list with the new product
       setShowAddProductForm(false);  // Close the add product form
-    })
-    .catch(error => console.error('Error adding product:', error));
+    } else {
+      const errorData = await response.json();
+      Swal.fire('Error!', errorData.message || 'Failed to add the product.', 'error');
+    }
+  } catch (error) {
+    console.error('Error adding product:', error);
+    Swal.fire('Error!', 'An unexpected error occurred.', 'error');
+  }
 };
 
 const handleImageUpload = (event) => {

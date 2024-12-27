@@ -31,16 +31,20 @@ function Products() {
   };
 
   useEffect(() => {
-    // Fetch products from the database
-    fetch(`https://find-item.vercel.app/api/products`)
-      .then(response => response.json())
+    // Fetch products from the backend
+    fetch(`${API_BASE_URL}/products`)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
       .then(data => {
-        // Map through the products and add the full image URL
-        const productsWithImages = data.map(product => ({
+        const productsArray = data.filter(product => product.category === 'Phones').map(product => ({
           ...product,
-          image: `https://find-item.vercel.app/uploads/${product.image}`
+          image: `${UPLOADS_URL}/${product.image}`
         }));
-        setProducts(productsWithImages);
+        setProducts(productsArray);
       })
       .catch(error => console.error('Error:', error));
   }, []);

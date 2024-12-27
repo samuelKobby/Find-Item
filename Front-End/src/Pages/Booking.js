@@ -16,9 +16,9 @@ const Booking = () => {
             event.preventDefault();
 
             const formData = new FormData(event.target);
-            const data = {};
+            const bookingData = {};
             formData.forEach((value, key) => {
-                data[key] = value;
+                bookingData[key] = value;
             });
 
             try {
@@ -27,7 +27,7 @@ const Booking = () => {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(data),
+                    body: JSON.stringify(bookingData),
                 });
 
                 if (response.ok) {

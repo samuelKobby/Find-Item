@@ -41,7 +41,7 @@ function Cocktails() {
       .then(data => {
         console.log('Image URLs:', data.map(product => product.image));
         const productsArray = data
-          .filter(product => product.category === 'Cocktail')
+          .filter(product => product.category === 'Bags')
           .map(product => ({
             ...product,
             image: `https://find-item.vercel.app/uploads/${product.image}`
