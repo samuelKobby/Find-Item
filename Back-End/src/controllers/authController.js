@@ -5,11 +5,11 @@ const TokenBlacklist = require('../models/TokenBlacklist');
 
 // Register a new admin
 exports.registerAdmin = async (req, res) => {
-  const { username, email, password } = req.body;
+  const { username, password } = req.body;
 
   try {
     // Check if the admin already exists
-    let admin = await Admin.findOne({ email });
+    let admin = await Admin.findOne({ username });
     if (admin) {
       return res.status(400).json({ msg: 'Admin already exists' });
     }
@@ -17,7 +17,6 @@ exports.registerAdmin = async (req, res) => {
     // Create a new admin
     admin = new Admin({
       username,
-      email,
       password,
     });
 
@@ -28,6 +27,7 @@ exports.registerAdmin = async (req, res) => {
     const payload = {
       admin: {
         id: admin.id,
+        username: admin.username
       },
     };
 
@@ -37,7 +37,14 @@ exports.registerAdmin = async (req, res) => {
       { expiresIn: '1h' },
       (err, token) => {
         if (err) throw err;
-        res.json({ token });
+        res.json({ 
+          success: true,
+          token,
+          admin: {
+            id: admin.id,
+            username: admin.username
+          }
+        });
       }
     );
   } catch (err) {
@@ -48,25 +55,26 @@ exports.registerAdmin = async (req, res) => {
 
 // Authenticate admin and get token
 exports.loginAdmin = async (req, res) => {
-  const { email, password } = req.body;
+  const { username, password } = req.body;
 
   try {
-    // Check if the admin exists
-    let admin = await Admin.findOne({ email });
+    // Check if admin exists
+    const admin = await Admin.findOne({ username });
     if (!admin) {
-      return res.status(400).json({ msg: 'Invalid Credentials' });
+      return res.status(400).json({ msg: 'Invalid credentials' });
     }
 
-    // Check if the password matches
+    // Check password
     const isMatch = await admin.matchPassword(password);
     if (!isMatch) {
-      return res.status(400).json({ msg: 'Invalid Credentials' });
+      return res.status(400).json({ msg: 'Invalid credentials' });
     }
 
     // Generate JWT token
     const payload = {
       admin: {
         id: admin.id,
+        username: admin.username
       },
     };
 
@@ -76,7 +84,14 @@ exports.loginAdmin = async (req, res) => {
       { expiresIn: '1h' },
       (err, token) => {
         if (err) throw err;
-        res.json({ token });
+        res.json({ 
+          success: true,
+          token,
+          admin: {
+            id: admin.id,
+            username: admin.username
+          }
+        });
       }
     );
   } catch (err) {
