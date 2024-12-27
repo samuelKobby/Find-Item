@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
 
-// Use environment variable or fallback for backend URL
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'https://find-item-backend.vercel.app/api';
+const BACKEND_URL = 'https://find-item.vercel.app';
 
 const Login = ({ setAuth }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -20,9 +19,9 @@ const Login = ({ setAuth }) => {
 
     try {
       const endpoint = isLogin ? 'login' : 'register';
-      console.log('Making request to:', `${BACKEND_URL}/auth/${endpoint}`); // Debug log
+      console.log('Making request to:', `https://find-item.vercel.app/auth/${endpoint}`); // Debug log
 
-      const response = await fetch(`${BACKEND_URL}/auth/${endpoint}`, {
+      const response = await fetch(`https://find-item.vercel.app/auth/${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

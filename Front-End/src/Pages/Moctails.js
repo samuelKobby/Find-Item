@@ -39,6 +39,7 @@ function Mocktails() {
         return response.json();
       })
       .then(data => {
+        console.log('Image URLs:', data.map(product => product.image));
         const productsArray = data
           .filter(product => product.category === 'Mocktail')
           .map(product => ({
