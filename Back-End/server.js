@@ -23,9 +23,7 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 // Add CORS configuration
 app.use(cors({
   origin: ['https://finditem.netlify.app', 'http://localhost:3000'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  exposedHeaders: ['Content-Range', 'X-Content-Range'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
 
