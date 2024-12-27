@@ -16,9 +16,16 @@ const Admin = () => {
   const [filterCategory, setFilterCategory] = useState('');
   const fileInputRef = useRef(null);
   const [showAddProductForm, setShowAddProductForm] = useState(false);
-  const [newProduct, setNewProduct] = useState({ name: '', category: '', price: '', image: '' });
+  const [newProduct, setNewProduct] = useState({
+    name: '',
+    category: '',
+    image: null,
+    imagePreview: null
+  });
 
   const token = localStorage.getItem('token');
+
+  const categories = ['ID Card', 'Accessory', 'Others'];
 
   useEffect(() => {
     const headers = {
@@ -105,14 +112,24 @@ const Admin = () => {
   };
 
   const handleAddProduct = async () => {
+    if (!newProduct.name || !newProduct.category || !newProduct.image) {
+      Swal.fire('Error!', 'Please fill in all fields', 'error');
+      return;
+    }
+
     const formData = new FormData();
     formData.append('name', newProduct.name);
     formData.append('category', newProduct.category);
-    formData.append('price', newProduct.price);
     formData.append('image', newProduct.image);
 
     try {
-      const response = await fetch('https://find-item.vercel.app/api/products', {
+      console.log('Sending data:', {
+        name: newProduct.name,
+        category: newProduct.category,
+        image: newProduct.image.name
+      });
+
+      const response = await fetch('https://find-item.vercel.app/api/products/add', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -120,15 +137,17 @@ const Admin = () => {
         body: formData
       });
 
+      const responseText = await response.text();
+      console.log('Server response text:', responseText);
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to add product');
+        throw new Error(responseText || 'Failed to add product');
       }
 
-      const data = await response.json();
+      const data = JSON.parse(responseText);
       setProducts([...products, data]);
       setShowAddProductForm(false);
-      setNewProduct({ name: '', category: '', price: '', image: '' });
+      setNewProduct({ name: '', category: '', image: null, imagePreview: null });
       Swal.fire('Success!', 'Product added successfully', 'success');
     } catch (error) {
       console.error('Error adding product:', error);
@@ -139,10 +158,27 @@ const Admin = () => {
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
-      if (editingProduct) {
-        setEditingProduct({ ...editingProduct, image: file });  // Update the image for the product being edited
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          if (editingProduct) {
+            setEditingProduct({
+              ...editingProduct,
+              image: file,
+              imagePreview: reader.result
+            });
+          } else {
+            setNewProduct({
+              ...newProduct,
+              image: file,
+              imagePreview: reader.result
+            });
+          }
+        };
+        reader.readAsDataURL(file);
       } else {
-        setNewProduct({ ...newProduct, image: file });  // Update the image for the new product
+        Swal.fire('Error!', 'Please upload an image file', 'error');
+        event.target.value = '';
       }
     }
   };
@@ -227,6 +263,129 @@ const Admin = () => {
       (searchTerm === '' || product.name.toLowerCase().includes(searchTerm.toLowerCase()))
     );
   });
+
+  const renderAddProductModal = () => (
+    <div className="modal-overlay">
+      <div className="modal-content">
+        <div className="modal-header">
+          <h2 className="modal-title">Add New Item</h2>
+          <button className="close-button" onClick={() => setShowAddProductForm(false)}>&times;</button>
+        </div>
+        
+        <div className="form-group">
+          <label className="form-label">Item Name</label>
+          <input
+            type="text"
+            className="form-input"
+            value={newProduct.name}
+            onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+            placeholder="Enter item name"
+          />
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">Category</label>
+          <select
+            className="form-select"
+            value={newProduct.category}
+            onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
+          >
+            <option value="">Select a category</option>
+            {categories.map((cat) => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">Image</label>
+          <div className="file-input-wrapper">
+            <div className="file-input-button">
+              {newProduct.image ? 'Change Image' : 'Choose Image'}
+            </div>
+            <input
+              type="file"
+              className="file-input"
+              accept="image/*"
+              onChange={handleImageUpload}
+            />
+          </div>
+          {newProduct.imagePreview && (
+            <div className="image-preview">
+              <img src={newProduct.imagePreview} alt="Preview" />
+            </div>
+          )}
+        </div>
+
+        <button className="submit-button" onClick={handleAddProduct}>
+          Add Item
+        </button>
+      </div>
+    </div>
+  );
+
+  const renderEditProductModal = () => (
+    <div className="modal-overlay">
+      <div className="modal-content">
+        <div className="modal-header">
+          <h2 className="modal-title">Edit Item</h2>
+          <button className="close-button" onClick={handleCloseModal}>&times;</button>
+        </div>
+        
+        <div className="form-group">
+          <label className="form-label">Item Name</label>
+          <input
+            type="text"
+            className="form-input"
+            value={editingProduct.name}
+            onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })}
+            placeholder="Enter item name"
+          />
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">Category</label>
+          <select
+            className="form-select"
+            value={editingProduct.category}
+            onChange={(e) => setEditingProduct({ ...editingProduct, category: e.target.value })}
+          >
+            <option value="">Select a category</option>
+            {categories.map((cat) => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">Image</label>
+          <div className="file-input-wrapper">
+            <div className="file-input-button">
+              {editingProduct.image ? 'Change Image' : 'Choose Image'}
+            </div>
+            <input
+              type="file"
+              className="file-input"
+              accept="image/*"
+              onChange={handleImageUpload}
+            />
+          </div>
+          {(editingProduct.imagePreview || editingProduct.image) && (
+            <div className="image-preview">
+              <img 
+                src={editingProduct.imagePreview || `https://find-item.vercel.app/uploads/${editingProduct.image}`}
+                alt="Preview"
+              />
+            </div>
+          )}
+        </div>
+
+        <button className="submit-button" onClick={handleSaveProduct}>
+          Save Changes
+        </button>
+      </div>
+    </div>
+  );
 
   return (
     <div id="admin-main-container">
@@ -422,92 +581,8 @@ const Admin = () => {
           </div>
         )}
       </div>
-      {editingProduct && (
-        <div id="admin-modal">
-          <div id="admin-modal-content">
-            <div className="modal-header">
-              <h2>Edit Product</h2>
-              <button className="closing-button" onClick={handleCloseModal}>×</button>
-            </div>
-            <div className="edit-form">
-              <label htmlFor="name">Product Name</label>
-              <input
-                type="text"
-                id="name"
-                value={editingProduct.name}
-                onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })}
-              />
-              <label htmlFor="price">Price</label>
-              <input
-                type="number"
-                id="price"
-                value={editingProduct.price}
-                onChange={(e) => setEditingProduct({ ...editingProduct, price: e.target.value })}
-              />
-              <label htmlFor="category">Category</label>
-              <input
-                type="text"
-                id="category"
-                value={editingProduct.category}
-                onChange={(e) => setEditingProduct({ ...editingProduct, category: e.target.value })}
-              />
-              <label htmlFor="image">Product Image</label>
-              <input
-                type="file"
-                id="image"
-                ref={fileInputRef}
-                style={{ display: 'none' }}
-                onChange={handleImageUpload}
-              />
-              <button type="button" onClick={handleUpdateImageClick}>Update Image</button>
-              <button type="button" onClick={handleSaveProduct}>Save</button>
-            </div>
-          </div>
-        </div>
-      )}
-      {showAddProductForm && (
-        <div id="admin-modal">
-          <div id="admin-modal-content">
-            <div className="modal-header">
-              <h2>Add Product</h2>
-              <button className="closing-button" onClick={() => setShowAddProductForm(false)}>×</button>
-            </div>
-            <div className="edit-form">
-              <label htmlFor="newname">Product Name</label>
-              <input
-                type="text"
-                id="newname"
-                value={newProduct.name}
-                onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-              />
-              <label htmlFor="newprice">Price</label>
-              <input
-                type="number"
-                id="newprice"
-                value={newProduct.price}
-                onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
-              />
-              <label htmlFor="newcategory">Category</label>
-              <input
-                type="text"
-                id="newcategory"
-                value={newProduct.category}
-                onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
-              />
-              <label htmlFor="newimage">Product Image</label>
-              <input
-                type="file"
-                id="newimage"
-                ref={fileInputRef}
-                style={{ display: 'none' }}
-                onChange={handleImageUpload}
-              />
-              <button type="button" onClick={handleUpdateImageClick}>Upload Image</button>
-              <button type="button" onClick={handleAddProduct}>Add Product</button>
-            </div>
-          </div>
-        </div>
-      )}
+      {showAddProductForm && renderAddProductModal()}
+      {editingProduct && renderEditProductModal()}
     </div>
   );
 };
