@@ -28,7 +28,9 @@ const Login = ({ setAuth }) => {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username, password }),
+        credentials: 'include',
+        mode: 'cors'
       });
 
       if (!response.ok) {
