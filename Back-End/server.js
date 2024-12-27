@@ -20,18 +20,20 @@ app.use(express.json({ limit: '50mb' }));
 // Middleware to parse URL-encoded data with increased size limit
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-// Middleware for CORS
-app.use(cors({
-  origin: 'https://finditem.netlify.app',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
-
 // Serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Serve uploaded files from the 'uploads' directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Add CORS configuration
+app.use(cors({
+  origin: ['https://finditem.netlify.app', 'http://localhost:3000'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
+  credentials: true
+}));
 
 // Mount routes
 app.use('/api/products', productRoutes);
