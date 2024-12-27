@@ -1,0 +1,41 @@
+{
+  "files": {
+    "main.css": "/static/css/main.d0d43e6f.css",
+    "main.js": "/static/js/main.7357fd30.js",
+    "static/media/Accessories.jpg": "/static/media/Accessories.f58928c15e94fb9fadd9.jpg",
+    "static/media/others.jpg": "/static/media/others.8f1e62e190b2e3e4f9d8.jpg",
+    "static/media/Books.jpg": "/static/media/Books.b84722846245c716783d.jpg",
+    "static/media/gadgets.jpg": "/static/media/gadgets.b2cec747e158f89a7b48.jpg",
+    "static/media/Bags.jpg": "/static/media/Bags.f7411b57be254077f603.jpg",
+    "static/media/Picture9.png": "/static/media/Picture9.f5b18b370b85f893b92c.png",
+    "static/media/New-Ghana-Card-Mockup-optimized.png": "/static/media/New-Ghana-Card-Mockup-optimized.590e14cae96b7499370a.png",
+    "static/media/Picture11.jpg": "/static/media/Picture11.d7364b14b52e7a18552b.jpg",
+    "static/media/3.png": "/static/media/3.1ae667f864b66c62e387.png",
+    "static/media/Picture1.png": "/static/media/Picture1.f786906d638b7f70fb62.png",
+    "static/media/bobablue.png": "/static/media/bobablue.9ea6c98027abc89e83d1.png",
+    "static/media/Picture3.jpg": "/static/media/Picture3.4ea5d9ab63da3ba39f85.jpg",
+    "static/media/Picture10.png": "/static/media/Picture10.8ffabaf3c1718a717540.png",
+    "static/media/Picture2.png": "/static/media/Picture2.857fbe0dab1fceca16ee.png",
+    "static/media/Picture5.webp": "/static/media/Picture5.2e430295181042ac4425.webp",
+    "static/media/Picture4.jpg": "/static/media/Picture4.7588bbae6ebcdac639f3.jpg",
+    "static/media/bob5.png": "/static/media/bob5.f5c7240e0c54425f54a1.png",
+    "static/media/Logo.png": "/static/media/Logo.a65d0dc5c0c0bdd10e09.png",
+    "static/media/bob6.png": "/static/media/bob6.ed259c1546e4d0874045.png",
+    "static/media/boba.png": "/static/media/boba.f12242048ea2d8e26a1f.png",
+    "static/media/bo4.png": "/static/media/bo4.72e2054a7dc8a2f8fdf2.png",
+    "static/media/Picture7.jpg": "/static/media/Picture7.75269b63e946bf199229.jpg",
+    "static/media/bob1.png": "/static/media/bob1.b6928af7aac03dc9ea4b.png",
+    "static/media/Nonalcohol.png": "/static/media/Nonalcohol.caa88574036274e327c5.png",
+    "static/media/Picture12.webp": "/static/media/Picture12.3c90d08ca55b943e9091.webp",
+    "static/media/profile.jpeg": "/static/media/profile.d43aa4e90121eb227e86.jpeg",
+    "static/media/picture6.avif": "/static/media/picture6.e7001b5d30058c87b5d5.avif",
+    "static/media/bookingPIc.avif": "/static/media/bookingPIc.f670703ce8a70e6bdfec.avif",
+    "index.html": "/index.html",
+    "main.d0d43e6f.css.map": "/static/css/main.d0d43e6f.css.map",
+    "main.7357fd30.js.map": "/static/js/main.7357fd30.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.d0d43e6f.css",
+    "static/js/main.7357fd30.js"
+  ]
+}
