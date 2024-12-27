@@ -21,17 +21,42 @@ const Admin = () => {
   const token = localStorage.getItem('token');
 
   useEffect(() => {
+    const headers = {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    };
+
     // Fetch products
-    fetch('https://find-item.vercel.app/api/products')
-      .then(response => response.json())
+    fetch('https://find-item.vercel.app/api/products', {
+      headers
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to fetch products');
+        }
+        return response.json();
+      })
       .then(data => setProducts(data))
-      .catch(error => console.error('Error fetching products:', error));
+      .catch(error => {
+        console.error('Error fetching products:', error);
+        Swal.fire('Error!', 'Failed to fetch products', 'error');
+      });
 
     // Fetch bookings
-    fetch('https://find-item.vercel.app/api/bookings')
-      .then(response => response.json())
+    fetch('https://find-item.vercel.app/api/bookings', {
+      headers
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to fetch bookings');
+        }
+        return response.json();
+      })
       .then(data => setBookings(data))
-      .catch(error => console.error('Error fetching bookings:', error));
+      .catch(error => {
+        console.error('Error fetching bookings:', error);
+        Swal.fire('Error!', 'Failed to fetch bookings', 'error');
+      });
   }, []);
 
   const handleCloseModal = () => {
@@ -42,84 +67,85 @@ const Admin = () => {
     setEditingProduct(product);
   };
 
-const handleSaveProduct = async () => {
-  try {
-    const formData = new FormData();
+  const handleSaveProduct = async () => {
+    try {
+      const formData = new FormData();
 
-    // Append all fields from editingProduct to FormData
-    for (const key in editingProduct) {
-      if (Object.prototype.hasOwnProperty.call(editingProduct, key)) {
-        formData.append(key, editingProduct[key]);
+      // Append all fields from editingProduct to FormData
+      for (const key in editingProduct) {
+        if (Object.prototype.hasOwnProperty.call(editingProduct, key)) {
+          formData.append(key, editingProduct[key]);
+        }
+      }
+
+      // Send the update request
+      const response = await fetch(`https://find-item.vercel.app/api/products/update/${editingProduct._id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData,
+      });
+
+      if (response.ok) {
+        const updatedProduct = await response.json();
+        setProducts((prevProducts) =>
+          prevProducts.map((product) => (product._id === editingProduct._id ? updatedProduct : product))
+        );
+        setEditingProduct(null);
+        Swal.fire('Updated!', 'The product has been updated.', 'success');
+      } else {
+        const errorData = await response.json();
+        Swal.fire('Error!', errorData.message || 'Failed to update the product.', 'error');
+      }
+    } catch (error) {
+      console.error('Error updating product:', error);
+      Swal.fire('Error!', 'An unexpected error occurred.', 'error');
+    }
+  };
+
+  const handleAddProduct = async () => {
+    const formData = new FormData();
+    formData.append('name', newProduct.name);
+    formData.append('category', newProduct.category);
+    formData.append('price', newProduct.price);
+    formData.append('image', newProduct.image);
+
+    try {
+      const response = await fetch('https://find-item.vercel.app/api/products', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to add product');
+      }
+
+      const data = await response.json();
+      setProducts([...products, data]);
+      setShowAddProductForm(false);
+      setNewProduct({ name: '', category: '', price: '', image: '' });
+      Swal.fire('Success!', 'Product added successfully', 'success');
+    } catch (error) {
+      console.error('Error adding product:', error);
+      Swal.fire('Error!', error.message || 'Failed to add product', 'error');
+    }
+  };
+
+  const handleImageUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      if (editingProduct) {
+        setEditingProduct({ ...editingProduct, image: file });  // Update the image for the product being edited
+      } else {
+        setNewProduct({ ...newProduct, image: file });  // Update the image for the new product
       }
     }
-
-    // Send the update request
-    const response = await fetch(`https://find-item.vercel.app/api/products/update/${editingProduct._id}`, {
-      method: 'PUT',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      },
-      body: formData,
-    });
-
-    if (response.ok) {
-      const updatedProduct = await response.json();
-      setProducts((prevProducts) =>
-        prevProducts.map((product) => (product._id === editingProduct._id ? updatedProduct : product))
-      );
-      setEditingProduct(null);
-      Swal.fire('Updated!', 'The product has been updated.', 'success');
-    } else {
-      const errorData = await response.json();
-      Swal.fire('Error!', errorData.message || 'Failed to update the product.', 'error');
-    }
-  } catch (error) {
-    console.error('Error updating product:', error);
-    Swal.fire('Error!', 'An unexpected error occurred.', 'error');
-  }
-};
-
-
- const handleAddProduct = async () => {
-  const formData = new FormData();
-  formData.append('name', newProduct.name);
-  formData.append('category', newProduct.category);
-  formData.append('price', newProduct.price);
-  formData.append('image', newProduct.image); // Adding the image file
-
-  try {
-    const response = await fetch('https://find-item.vercel.app/api/products', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`  // Include the token for authentication
-      },
-      body: formData,  // Send the formData as the body of the request
-    });
-    if (response.ok) {
-      const data = await response.json();
-      setProducts([...products, data]);  // Update the products list with the new product
-      setShowAddProductForm(false);  // Close the add product form
-    } else {
-      const errorData = await response.json();
-      Swal.fire('Error!', errorData.message || 'Failed to add the product.', 'error');
-    }
-  } catch (error) {
-    console.error('Error adding product:', error);
-    Swal.fire('Error!', 'An unexpected error occurred.', 'error');
-  }
-};
-
-const handleImageUpload = (event) => {
-  const file = event.target.files[0];
-  if (file) {
-    if (editingProduct) {
-      setEditingProduct({ ...editingProduct, image: file });  // Update the image for the product being edited
-    } else {
-      setNewProduct({ ...newProduct, image: file });  // Update the image for the new product
-    }
-  }
-};
-
+  };
 
   const handleUpdateImageClick = () => {
     fileInputRef.current.click();
@@ -133,7 +159,7 @@ const handleImageUpload = (event) => {
     setFilterCategory(e.target.value);
   };
 
-const handleDeleteBooking = async (id) => {
+  const handleDeleteBooking = async (id) => {
     const result = await Swal.fire({
       title: 'Are you sure?',
       text: 'You will not be able to recover this booking!',
@@ -155,80 +181,45 @@ const handleDeleteBooking = async (id) => {
     }
   };
 
-const handleDeleteProduct = async (id) => {
-  const result = await Swal.fire({
-    title: 'Are you sure?',
-    text: 'You will not be able to recover this product!',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#3085d6',
-    cancelButtonColor: '#d33',
-    confirmButtonText: 'Yes, delete it!'
-  });
+  const handleDeleteProduct = async (productId) => {
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    });
 
-  if (result.isConfirmed) {
-    try {
-      const response = await fetch(`https://find-item.vercel.app/api/products/delete/${id}`, {
-        method: 'DELETE',
-        headers: {
-            'Authorization': `Bearer ${token}` // Include the token in the request
+    if (result.isConfirmed) {
+      try {
+        const response = await fetch(`https://find-item.vercel.app/api/products/${productId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
           }
-      });
+        });
 
-      if (response.ok) {
-        setProducts((prevProducts) => prevProducts.filter(product => product._id !== id));
-        Swal.fire('Deleted!', 'The product has been deleted.', 'success');
-      } else {
-        const errorData = await response.json();
-        Swal.fire('Error!', errorData.message || 'Failed to delete the product.', 'error');
+        if (!response.ok) {
+          throw new Error('Failed to delete product');
+        }
+
+        setProducts(products.filter(product => product._id !== productId));
+        Swal.fire('Deleted!', 'Product has been deleted.', 'success');
+      } catch (error) {
+        console.error('Error deleting product:', error);
+        Swal.fire('Error!', 'Failed to delete product', 'error');
       }
-    } catch (error) {
-      console.error('Error deleting product:', error);
-      Swal.fire('Error!', 'An unexpected error occurred.', 'error');
     }
-  }
-};
+  };
 
-  
-
-const handleLogout = async () => {
-  const result = await Swal.fire({
-    title: 'Are you sure?',
-    text: 'You will be logged out!',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#3085d6',
-    cancelButtonColor: '#d33',
-    confirmButtonText: 'Yes, logout!'
-  });
-
-  if (result.isConfirmed) {
-    try {
-      const token = localStorage.getItem('token');
-
-      // Send the logout request to the backend
-      await fetch('https://find-item.vercel.app/api/auth/logout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ token }) // Send the token to the backend
-      });
-
-      // Remove the token from localStorage
-      localStorage.removeItem('token');
-
-      // Redirect to login page or show success message
-      window.location.href = '/login';
-      Swal.fire('Logged out!', 'You have been logged out successfully.', 'success');
-    } catch (error) {
-      console.error('Logout error:', error);
-      Swal.fire('Error!', 'An error occurred while logging out.', 'error');
-    }
-  }
-};
-
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = '/login';
+  };
 
   const filteredProducts = products.filter(product => {
     return (
@@ -247,11 +238,11 @@ const handleLogout = async () => {
         <div className="admin-sidebar-item" onClick={() => setSelectedSection('bookings')}>Bookings</div>
         <div className="admin-sidebar-item" onClick={() => setSelectedSection('previewProducts')}>Preview Products</div>
         <FontAwesomeIcon
-            icon={faSignOutAlt}
-            className="logout-icon"
-            style={{ cursor: 'pointer', fontSize: '20px' }}
-            onClick={handleLogout}
-          />
+          icon={faSignOutAlt}
+          className="logout-icon"
+          style={{ cursor: 'pointer', fontSize: '20px' }}
+          onClick={handleLogout}
+        />
 
       </div>
       <div id="admin-content">
@@ -368,21 +359,21 @@ const handleLogout = async () => {
                           <option value="Pending">Pending</option>
                           <option value="Accepted">Accept</option>
                           <option value="Denied">Deny</option>
-                          
+
                         </select>
                       </div>
                     </td>
                     <td>
-                      
-                      <td>
-                      <FontAwesomeIcon
-                        icon={faTrash}
-                        onClick={() => handleDeleteBooking(booking._id)}
-                        className="admin-delete-button"
-                        style={{ cursor: 'pointer', fontSize: '20px', marginLeft: '10px' }}
-                      />
 
-                    </td>
+                      <td>
+                        <FontAwesomeIcon
+                          icon={faTrash}
+                          onClick={() => handleDeleteBooking(booking._id)}
+                          className="admin-delete-button"
+                          style={{ cursor: 'pointer', fontSize: '20px', marginLeft: '10px' }}
+                        />
+
+                      </td>
                     </td>
                   </tr>
                 ))}
@@ -410,21 +401,21 @@ const handleLogout = async () => {
                   <h3>{product.name}</h3>
                   <p>Category: {product.category}</p>
                   <p>Price: GH¢{product.price}</p>
-                  
+
                 </div>
                 <div className="admin-product-actions">
-                    <FontAwesomeIcon
-                        icon={faEdit}
-                        onClick={() => handleEditProduct(product)}
-                        className="admin-edit-button"
-                        style={{ cursor: 'pointer', fontSize: '20px' }}
-                      />
-                      <FontAwesomeIcon
-                        icon={faTrash}
-                        onClick={() => handleDeleteProduct(product._id, 'products')}
-                        className="admin-delete-button"
-                        style={{ cursor: 'pointer', fontSize: '20px', marginLeft: '10px' }}
-                      />
+                  <FontAwesomeIcon
+                    icon={faEdit}
+                    onClick={() => handleEditProduct(product)}
+                    className="admin-edit-button"
+                    style={{ cursor: 'pointer', fontSize: '20px' }}
+                  />
+                  <FontAwesomeIcon
+                    icon={faTrash}
+                    onClick={() => handleDeleteProduct(product._id)}
+                    className="admin-delete-button"
+                    style={{ cursor: 'pointer', fontSize: '20px', marginLeft: '10px' }}
+                  />
                 </div>
               </div>
             ))}
@@ -460,7 +451,7 @@ const handleLogout = async () => {
                 value={editingProduct.category}
                 onChange={(e) => setEditingProduct({ ...editingProduct, category: e.target.value })}
               />
-               <label htmlFor="image">Product Image</label>
+              <label htmlFor="image">Product Image</label>
               <input
                 type="file"
                 id="image"
