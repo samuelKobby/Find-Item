@@ -20,12 +20,6 @@ app.use(express.json({ limit: '50mb' }));
 // Middleware to parse URL-encoded data with increased size limit
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-// Serve static files from the 'public' directory
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Serve uploaded files from the 'uploads' directory
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
 // Add CORS configuration
 app.use(cors({
   origin: ['https://finditem.netlify.app', 'http://localhost:3000'],
