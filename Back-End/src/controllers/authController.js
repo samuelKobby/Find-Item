@@ -56,16 +56,22 @@ exports.registerAdmin = async (req, res) => {
 // Authenticate admin and get token
 exports.loginAdmin = async (req, res) => {
   const { username, password } = req.body;
+  console.log('Login attempt for username:', username); // Debug log
 
   try {
     // Check if admin exists
     const admin = await Admin.findOne({ username });
+    console.log('Found admin:', admin ? 'Yes' : 'No'); // Debug log
+
     if (!admin) {
       return res.status(400).json({ msg: 'Invalid credentials' });
     }
 
     // Check password
+    console.log('Checking password...'); // Debug log
     const isMatch = await admin.matchPassword(password);
+    console.log('Password match:', isMatch ? 'Yes' : 'No'); // Debug log
+
     if (!isMatch) {
       return res.status(400).json({ msg: 'Invalid credentials' });
     }
@@ -83,7 +89,10 @@ exports.loginAdmin = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '1h' },
       (err, token) => {
-        if (err) throw err;
+        if (err) {
+          console.error('JWT Sign error:', err); // Debug log
+          throw err;
+        }
         res.json({ 
           success: true,
           token,
@@ -95,8 +104,8 @@ exports.loginAdmin = async (req, res) => {
       }
     );
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server error');
+    console.error('Login error:', err); // Detailed error logging
+    res.status(500).json({ msg: 'Server error', error: err.message });
   }
 };
 
