@@ -1,70 +1,132 @@
 const Product = require('../models/productModel');
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+const { storage } = require('../config/firebase');
+const { ref, uploadBytes, getDownloadURL } = require('firebase/storage');
 
-// Ensure uploads directory exists
-const uploadsDir = path.join(__dirname, '../../uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
-
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, uploadsDir);
+// Configure multer for memory storage
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB limit
   },
-  filename: function (req, file, cb) {
-    // Create a unique filename using timestamp
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  },
-});
-
-const upload = multer({ 
-  storage,
   fileFilter: function (req, file, cb) {
     // Accept images only
     if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/i)) {
       return cb(new Error('Only image files are allowed!'), false);
     }
     cb(null, true);
-  },
-  limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB limit
   }
-});
-
-// Middleware to handle single file upload
-const uploadProductImage = upload.single('image');
+}).single('image'); // Move single() here
 
 exports.addProduct = async (req, res) => {
-  uploadProductImage(req, res, async function (err) {
-    if (err) {
-      console.error('Upload error:', err);
-      return res.status(400).json({ error: err.message });
+  try {
+    // Log the request body and file
+    console.log('Request body:', req.body);
+    console.log('Request file:', req.file);
+
+    // Handle file upload first
+    await new Promise((resolve, reject) => {
+      upload(req, res, function(err) {
+        if (err) {
+          console.error('Multer error:', err);
+          reject(err);
+        }
+        resolve();
+      });
+    });
+
+    // Check if we have the file after upload
+    if (!req.file) {
+      console.error('No file uploaded');
+      return res.status(400).json({ error: 'Image is required' });
     }
 
-    try {
-      const { name, category } = req.body;
-      
-      if (!req.file) {
-        return res.status(400).json({ error: 'Image is required' });
-      }
+    const { name, category } = req.body;
+    
+    // Create a unique filename
+    const timestamp = Date.now();
+    const fileName = `${timestamp}-${req.file.originalname}`;
+    
+    console.log('Creating Firebase storage reference for:', fileName);
+    
+    // Create a reference to Firebase Storage
+    const storageRef = ref(storage, `products/${fileName}`);
+    
+    console.log('Uploading file to Firebase...');
+    
+    // Upload the file buffer to Firebase
+    const snapshot = await uploadBytes(storageRef, req.file.buffer);
+    console.log('File uploaded to Firebase:', snapshot);
+    
+    // Get the download URL
+    const imageUrl = await getDownloadURL(storageRef);
+    console.log('Got download URL:', imageUrl);
 
-      const image = req.file.filename; // Use the generated filename
+    // Create and save the product
+    const product = new Product({
+      name,
+      category,
+      image: imageUrl
+    });
 
-      console.log('File:', req.file);
-      console.log('Body:', req.body);
+    const savedProduct = await product.save();
+    console.log('Product saved:', savedProduct);
+    
+    res.status(201).json(savedProduct);
+  } catch (error) {
+    console.error('Full error details:', error);
+    res.status(400).json({ 
+      error: error.message,
+      stack: error.stack,
+      details: 'Error occurred while processing the request'
+    });
+  }
+};
 
-      const product = new Product({ name, category, image });
-      await product.save();
-      res.status(201).json(product);
-    } catch (error) {
-      console.error('Product creation error:', error);
-      res.status(400).json({ error: error.message });
+exports.updateProduct = async (req, res) => {
+  try {
+    // Handle file upload first
+    await new Promise((resolve, reject) => {
+      upload(req, res, function(err) {
+        if (err) {
+          console.error('Multer error:', err);
+          reject(err);
+        }
+        resolve();
+      });
+    });
+
+    const { name, category } = req.body;
+    let imageUrl = req.body.image; // Keep existing image URL if no new file
+
+    if (req.file) {
+      // Upload new image to Firebase
+      const timestamp = Date.now();
+      const fileName = `${timestamp}-${req.file.originalname}`;
+      const storageRef = ref(storage, `products/${fileName}`);
+      await uploadBytes(storageRef, req.file.buffer);
+      imageUrl = await getDownloadURL(storageRef);
     }
-  });
+
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    product.name = name || product.name;
+    product.category = category || product.category;
+    product.image = imageUrl || product.image;
+
+    await product.save();
+    res.status(200).json(product);
+  } catch (error) {
+    console.error('Full error details:', error);
+    res.status(400).json({ 
+      error: error.message,
+      stack: error.stack,
+      details: 'Error occurred while updating the product'
+    });
+  }
 };
 
 exports.getProducts = async (req, res) => {
@@ -90,45 +152,10 @@ exports.getProductById = async (req, res) => {
   }
 };
 
-exports.updateProduct = async (req, res) => {
-  uploadProductImage(req, res, async function (err) {
-    if (err) {
-      console.error('Upload error:', err);
-      return res.status(400).json({ error: err.message });
-    }
-
-    try {
-      const { name, category } = req.body;
-      
-      let image;
-      if (req.file) {
-        image = req.file.filename; // Use the generated filename
-      } else {
-        image = req.body.image;
-      }
-
-      const product = await Product.findById(req.params.id);
-      if (!product) {
-        return res.status(404).json({ error: 'Product not found' });
-      }
-
-      product.name = name || product.name;
-      product.category = category || product.category;
-      product.image = image || product.image;
-
-      await product.save();
-      res.status(200).json(product);
-    } catch (error) {
-      console.error('Product update error:', error);
-      res.status(400).json({ error: error.message });
-    }
-  });
-};
-
 exports.deleteProduct = async (req, res) => {
   try {
-    const result = await Product.deleteOne({ _id: req.params.id });
-    if (result.deletedCount === 0) {
+    const product = await Product.findByIdAndDelete(req.params.id);
+    if (!product) {
       return res.status(404).json({ error: 'Product not found' });
     }
     res.status(200).json({ message: 'Product removed' });
