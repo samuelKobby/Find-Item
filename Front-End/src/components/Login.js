@@ -19,24 +19,27 @@ const Login = ({ setAuth }) => {
 
     try {
       const endpoint = isLogin ? 'login' : 'register';
-      console.log('Making request to:', `https://find-item.vercel.app/auth/${endpoint}`); // Debug log
+      const url = `${BACKEND_URL}/api/auth/${endpoint}`;
+      console.log('Making request to:', url); // Debug log
 
-      const response = await fetch(`https://find-item.vercel.app/auth/${endpoint}`, {
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
         body: JSON.stringify({ username, password }),
         mode: 'cors'
       });
 
-      console.log('Response status:', response.status); // Debug log
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
+        throw new Error(`${response.status}: Authentication failed`);
+      }
+
       const data = await response.json();
       console.log('Response data:', data); // Debug log
-
-      if (!response.ok) {
-        throw new Error(data.message || `${response.status}: Authentication failed`);
-      }
 
       if (data.success && data.token) {
         // Store token in localStorage
