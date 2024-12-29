@@ -20,13 +20,14 @@ const Login = ({ setAuth }) => {
     try {
       const endpoint = isLogin ? 'login' : 'register';
       
-      const response = await fetch(`${API_BASE_URL}/auth/${endpoint}`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username, password }),
+        credentials: 'include'
       });
 
       if (!response.ok) {
