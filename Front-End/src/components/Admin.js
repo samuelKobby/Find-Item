@@ -88,7 +88,7 @@ const Admin = () => {
         formData.append('image', editingProduct.image);
       }
 
-      // Update the API endpoint (remove /update from the URL)
+      // Make sure to use the correct endpoint
       const response = await fetch(`https://find-item.vercel.app/api/products/${editingProduct._id}`, {
         method: 'PUT',
         headers: {
@@ -97,12 +97,19 @@ const Admin = () => {
         body: formData,
       });
 
+      const data = await response.text();
+      console.log('Server response:', data);
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to update product');
+        try {
+          const errorData = JSON.parse(data);
+          throw new Error(errorData.error || 'Failed to update product');
+        } catch (e) {
+          throw new Error('Failed to update product: ' + data);
+        }
       }
 
-      const updatedProduct = await response.json();
+      const updatedProduct = JSON.parse(data);
       setProducts(prevProducts =>
         prevProducts.map(product =>
           product._id === editingProduct._id ? updatedProduct : product
