@@ -42,6 +42,12 @@ exports.addProduct = async (req, res) => {
         return res.status(400).json({ error: 'Image is required' });
       }
 
+      console.log('Processing file:', {
+        originalname: req.file.originalname,
+        mimetype: req.file.mimetype,
+        size: req.file.size
+      });
+
       // Create a unique filename
       const timestamp = Date.now();
       const fileName = `${timestamp}-${req.file.originalname.replace(/[^a-zA-Z0-9.]/g, '_')}`;
@@ -50,11 +56,20 @@ exports.addProduct = async (req, res) => {
       const storageRef = ref(storage, `products/${fileName}`);
       
       try {
-        // Upload the file buffer to Firebase
-        await uploadBytes(storageRef, req.file.buffer);
+        console.log('Uploading to Firebase Storage:', fileName);
+        
+        // Create file metadata including the content type
+        const metadata = {
+          contentType: req.file.mimetype,
+        };
+
+        // Upload the file buffer to Firebase with metadata
+        await uploadBytes(storageRef, req.file.buffer, metadata);
+        console.log('File uploaded successfully');
         
         // Get the download URL
         const imageUrl = await getDownloadURL(storageRef);
+        console.log('Download URL obtained:', imageUrl);
 
         // Create and save the product
         const product = new Product({
@@ -65,14 +80,29 @@ exports.addProduct = async (req, res) => {
         });
 
         await product.save();
+        console.log('Product saved to database');
+        
         res.status(201).json(product);
       } catch (error) {
         console.error('Firebase operation error:', error);
-        res.status(500).json({ error: 'Error uploading image to storage' });
+        // Log more details about the error
+        if (error.code) {
+          console.error('Error code:', error.code);
+        }
+        if (error.message) {
+          console.error('Error message:', error.message);
+        }
+        res.status(500).json({ 
+          error: 'Error uploading image to storage',
+          details: error.message
+        });
       }
     } catch (error) {
       console.error('Server error:', error);
-      res.status(500).json({ error: 'Server error' });
+      res.status(500).json({ 
+        error: 'Server error',
+        details: error.message
+      });
     }
   });
 };
