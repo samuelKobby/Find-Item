@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL, UPLOADS_URL } from '../config/api';
 import '../Styles/Products.css';
-import team2 from '../Images/profile.jpeg';
+import '../Styles/ScrollToTop.css';
+import ScrollToTop from '../components/ScrollToTop';
 
 function Cocktails() {
   const [products, setProducts] = useState([]);
-  const [visibleProducts, setVisibleProducts] = useState(3);
+  const [visibleProducts, setVisibleProducts] = useState(6);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [error, setError] = useState('');
 
@@ -15,23 +17,27 @@ function Cocktails() {
   }, []);
 
   useEffect(() => {
-    if (windowWidth <= 1068) {
+    if (windowWidth <= 768) {
       setVisibleProducts(3);
-    } else if (windowWidth <= 1920) {
-      setVisibleProducts(3);
-    } else if (windowWidth <= 480) {
-      setVisibleProducts(3);
+    } else if (windowWidth <= 1024) {
+      setVisibleProducts(4);
     } else {
-      setVisibleProducts(products.length);
+      setVisibleProducts(6);
     }
-  }, [windowWidth, products.length]);
+  }, [windowWidth]);
 
   const showMoreProducts = () => {
     setVisibleProducts(prev => prev + 3);
   };
 
   useEffect(() => {
-    fetch('https://find-item.vercel.app/api/products')
+    fetch(`${API_BASE_URL}/api/products`, {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    })
       .then(response => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
@@ -39,97 +45,66 @@ function Cocktails() {
         return response.json();
       })
       .then(data => {
-        console.log('Image URLs:', data.map(product => product.image));
         const productsArray = data
-          .filter(product => product.category === 'Bags')
+          .filter(product => product.category === 'ID Card')
           .map(product => ({
             ...product,
-            image: `https://find-item.vercel.app/uploads/${product.image}`
+            image: product.image ? (
+              product.image.startsWith('http') ? 
+                product.image : 
+                `${API_BASE_URL}/api/uploads/${product.image}`
+            ) : null
           }));
         setProducts(productsArray);
       })
       .catch(error => {
-        console.error('Error fetching data:', error);
-        setError('Failed to fetch products. Please try again later.');
+        console.error('Error:', error);
+        setError('Failed to load products');
       });
   }, []);
 
   return (
-    <div>
-      <div className="product-main">
-        <div className="homepage" id='cocktail'>
-          <div className="content">
-            <h1 className="title">Browse Found <br />Student and Other ID Cards.</h1>
-            <p className="description">
-              Have you lost your ID card? Check our list of found cards <br />
-              to see if yours has been recovered.
-            </p>
-            <button id='cta-button' className="cta-button"><a href="./booking">Get Some</a></button>
-          </div>
-        </div>
-
-        <div className="product-head">
-          <h1>Report Lost Card</h1>
-          <p>
-            Below is a list of student ID cards that have been recently found. If your card is listed, please contact us to retrieve it.
+    <div className="product-main">
+      <div className="homepage" id='products'>
+        <div className="content">
+          <h1 className="title">Find Your <br />Missing Belongings</h1>
+          <p className="description">
+            Lost something on campus? <br />Discover our reliable platform to help you<br /> 
+            locate your lost items with ease.
           </p>
         </div>
-        <div className="product-grid">
-          {error && <p className="error">{error}</p>}
-          {products.slice(0, visibleProducts).map((product) => (
-            <div key={product._id} className="product-card">
-              <div className="product-image">
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  onError={(e) => { e.target.src = '/path/to/default-image.jpg'; }} // Replace with actual default image path
-                />
-              </div>
+      </div>
+
+      <div className="products-container">
+        <h2 className="section-title">Found Items</h2>
+        {error && <div className="error-message">{error}</div>}
+        <div className="products-grid">
+          {products.slice(0, visibleProducts).map((product, index) => (
+            <div key={product._id || index} className="product-card">
+              <img 
+                src={product.image || '/default-image.jpg'} 
+                alt={product.name} 
+                className="product-image"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = '/default-image.jpg';
+                }}
+              />
               <div className="product-info">
                 <h3>{product.name}</h3>
-                <p>Price: ${product.price}</p>
-                <p>{product.category}</p>
+                <p>{product.description}</p>
+                <p className="category">Category: {product.category}</p>
               </div>
             </div>
           ))}
         </div>
         {visibleProducts < products.length && (
-          <button className="show-more-button" onClick={showMoreProducts}>
-            View More
+          <button onClick={showMoreProducts} className="load-more">
+            Load More
           </button>
         )}
       </div>
-      <div className='reviews-container'>
-        <h2 className='review-h2'>What People Are Saying</h2>
-        <div className='main-review-section'>
-          <div className='main-review-sub'>
-            <div className='review-content'>
-              <div className='review1'>
-                <img src={team2} alt="Drinks" className='review-image'/>
-                <h3>Jane Doe</h3>
-                <p>Student, University</p>
-              </div>
-              <div className='review2'>
-                <p className='stars'>⭐⭐⭐⭐⭐</p>
-                <p className='review-text'>“Thanks to this platform, I was able to recover my lost ID card quickly. Truly a lifesaver!”</p>
-              </div>
-            </div>
-          </div>
-          <div className='main-review-sub'>
-            <div className='review-content'>
-              <div className='review1'>
-                <img src={team2} alt="Drinks" className='review-image'/>
-                <h3>Sam John</h3>
-                <p>Student, College</p>
-              </div>
-              <div className='review2'>
-                <p className='stars'>⭐⭐⭐⭐⭐</p>
-                <p className='review-text'>“Efficient and reliable. This service helped me find my ID card after weeks of searching.”</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <ScrollToTop />
     </div>
   );
 }

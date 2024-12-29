@@ -48,7 +48,11 @@ function Products() {
       .then(data => {
         const productsArray = data.map(product => ({
           ...product,
-          image: product.image.startsWith('http') ? product.image : `${UPLOADS_URL}/${product.image}`
+          image: product.image ? (
+            product.image.startsWith('http') ? 
+              product.image : 
+              `${API_BASE_URL}/api/uploads/${product.image}`
+          ) : null
         }));
         setProducts(productsArray);
       })

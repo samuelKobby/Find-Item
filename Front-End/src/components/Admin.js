@@ -69,7 +69,14 @@ const Admin = () => {
         throw new Error('Failed to fetch products');
       }
       const productsData = await productsResponse.json();
-      setProducts(productsData);
+      setProducts(productsData.map(product => ({
+        ...product,
+        image: product.image ? (
+          product.image.startsWith('http') ? 
+            product.image : 
+            `${API_BASE_URL}/api/uploads/${product.image}`
+        ) : null
+      })));
 
       // Fetch bookings
       const bookingsResponse = await fetch(`${API_BASE_URL}/api/bookings`, { 
@@ -622,7 +629,7 @@ const Admin = () => {
                 <option value="">Filter</option>
                 <option value="">All</option>
                 <option value="ID Cards">ID Cards</option>
-                <option value="Accessories">Accessories</option>
+                <option value="Accessory">Accessories</option>
                 <option value="Others">Others</option>
               </select>
               <input type='search' name='search' id='search' placeholder="Search" value={searchTerm} onChange={handleSearchChange} />
