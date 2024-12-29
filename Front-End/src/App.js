@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -17,6 +17,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { isAuthenticated } from './utils/auth';
 
 function App() {
+  const [isAuth, setIsAuth] = useState(false);
+
   // Component to handle conditional footer rendering
   const AppContent = () => {
     const location = useLocation();
@@ -50,7 +52,7 @@ function App() {
             element={
               isAuthenticated() ? 
                 <Navigate to="/admin" /> : 
-                <Login />
+                <Login setAuth={setIsAuth} />
             }
           />
         </Routes>

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
-
-
+import { API_BASE_URL } from '../config/api';
+import { setAuthToken } from '../utils/auth';
 
 const Login = ({ setAuth }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -20,15 +20,14 @@ const Login = ({ setAuth }) => {
     try {
       const endpoint = isLogin ? 'login' : 'register';
       
-      const response = await fetch(`https://find-item.vercel.app/api/auth/${endpoint}`, {
+      const response = await fetch(`${API_BASE_URL}/auth/${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
         body: JSON.stringify({ username, password }),
-        credentials: 'include',
-        mode: 'cors'
+        credentials: 'include'
       });
 
       if (!response.ok) {
@@ -38,11 +37,10 @@ const Login = ({ setAuth }) => {
       }
 
       const data = await response.json();
-      console.log('Response data:', data); // Debug log
 
       if (data.success && data.token) {
-        // Store token in localStorage
-        localStorage.setItem('token', data.token);
+        // Store token using auth utility
+        setAuthToken(data.token);
         
         // Store user info if needed
         if (data.admin) {
@@ -105,14 +103,14 @@ const Login = ({ setAuth }) => {
         </button>
       </form>
 
-      <button 
+      <button
         onClick={() => {
           setIsLogin(!isLogin);
-          setError('');
           setUsername('');
           setPassword('');
+          setError('');
         }} 
-        className="switch-mode" 
+        className="switch-mode"
         disabled={isLoading}
       >
         {isLogin ? 'Need to Register?' : 'Back to Login'}
