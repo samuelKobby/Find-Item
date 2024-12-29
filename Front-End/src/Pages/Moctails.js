@@ -52,7 +52,7 @@ function Mocktails() {
             image: product.image ? (
               product.image.startsWith('http') ? 
                 product.image : 
-                `${API_BASE_URL}/uploads/${product.image}`
+                `${API_BASE_URL}/api/uploads/${product.image}`
             ) : null
           }));
         setProducts(productsArray);
