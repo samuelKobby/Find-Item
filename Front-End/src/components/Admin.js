@@ -56,7 +56,10 @@ const Admin = () => {
 
     try {
       // Fetch products
-      const productsResponse = await fetch(`${API_BASE_URL}/products`, { headers });
+      const productsResponse = await fetch(`${API_BASE_URL}/api/products`, { 
+        headers,
+        credentials: 'include'
+      });
       if (!productsResponse.ok) {
         if (productsResponse.status === 401) {
           logout();
@@ -69,7 +72,10 @@ const Admin = () => {
       setProducts(productsData);
 
       // Fetch bookings
-      const bookingsResponse = await fetch(`${API_BASE_URL}/bookings`, { headers });
+      const bookingsResponse = await fetch(`${API_BASE_URL}/api/bookings`, { 
+        headers,
+        credentials: 'include'
+      });
       if (!bookingsResponse.ok) {
         if (bookingsResponse.status === 401) {
           logout();
@@ -116,7 +122,7 @@ const Admin = () => {
       }
 
       // Make sure to use the correct endpoint
-      const response = await fetch(`${API_BASE_URL}/products/${editingProduct._id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/products/${editingProduct._id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${getAuthToken()}`,
@@ -169,7 +175,7 @@ const Admin = () => {
         image: newProduct.image.name
       });
 
-      const response = await fetch(`${API_BASE_URL}/products/add`, {
+      const response = await fetch(`${API_BASE_URL}/api/products/add`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${getAuthToken()}`,
@@ -196,35 +202,33 @@ const Admin = () => {
     }
   };
 
-  const handleImageUpload = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      if (file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          if (editingProduct) {
-            setEditingProduct({
-              ...editingProduct,
-              image: file,
-              imagePreview: reader.result
-            });
-          } else {
-            setNewProduct({
-              ...newProduct,
-              image: file,
-              imagePreview: reader.result
-            });
-          }
-        };
-        reader.readAsDataURL(file);
-      } else {
-        Swal.fire('Error!', 'Please upload an image file', 'error');
-        event.target.value = '';
+  const handleImageUpload = async (file) => {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/products/upload`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${getAuthToken()}`
+        },
+        credentials: 'include',
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to upload image');
       }
+
+      const data = await response.json();
+      return data.imageUrl;
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      throw error;
     }
   };
 
-  const handleUpdateImageClick = () => {
+  const handleUpdateImageClick = async () => {
     fileInputRef.current.click();
   };
 
@@ -249,7 +253,7 @@ const Admin = () => {
 
     if (result.isConfirmed) {
       try {
-        await fetch(`${API_BASE_URL}/bookings/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${getAuthToken()}` } });
+        await fetch(`${API_BASE_URL}/api/bookings/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${getAuthToken()}` } });
         setBookings(bookings.filter(booking => booking._id !== id));
         Swal.fire('Deleted!', 'The booking has been deleted.', 'success');
       } catch (error) {
@@ -272,7 +276,7 @@ const Admin = () => {
     if (result.isConfirmed) {
       try {
         // Update the API endpoint (remove /delete from the URL)
-        const response = await fetch(`${API_BASE_URL}/products/${productId}`, {
+        const response = await fetch(`${API_BASE_URL}/api/products/${productId}`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${getAuthToken()}`
@@ -348,7 +352,22 @@ const Admin = () => {
               type="file"
               className="file-input"
               accept="image/*"
-              onChange={handleImageUpload}
+              onChange={async (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                  if (file.type.startsWith('image/')) {
+                    const imageUrl = await handleImageUpload(file);
+                    setNewProduct({
+                      ...newProduct,
+                      image: file,
+                      imagePreview: imageUrl
+                    });
+                  } else {
+                    Swal.fire('Error!', 'Please upload an image file', 'error');
+                    e.target.value = '';
+                  }
+                }
+              }}
             />
           </div>
           {newProduct.imagePreview && (
@@ -408,7 +427,22 @@ const Admin = () => {
               type="file"
               className="file-input"
               accept="image/*"
-              onChange={handleImageUpload}
+              onChange={async (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                  if (file.type.startsWith('image/')) {
+                    const imageUrl = await handleImageUpload(file);
+                    setEditingProduct({
+                      ...editingProduct,
+                      image: file,
+                      imagePreview: imageUrl
+                    });
+                  } else {
+                    Swal.fire('Error!', 'Please upload an image file', 'error');
+                    e.target.value = '';
+                  }
+                }
+              }}
             />
           </div>
           {(editingProduct.imagePreview || editingProduct.image) && (
