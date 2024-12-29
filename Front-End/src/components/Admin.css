@@ -1,7 +1,22 @@
+@import '../Styles/typography.css';
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 #admin-main-container {
   display: flex;
   height: 100vh;
   overflow: hidden;
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }
 
 #admin-sidebar {
@@ -24,8 +39,8 @@
   margin-bottom: 20px;
 }
 #admin-sidebar-logo {
-  font-size: 20px;
-  font-weight: bold;
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
   margin-bottom: 20px;
 }
 
@@ -42,6 +57,8 @@
   align-items: center;
   justify-content: flex-start;
   gap: 10px;
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
 }
 
 #nav button.active {
@@ -228,8 +245,8 @@
 }
 
 .modal-header h2 {
-  font-size: 30px;
-  font-weight: 800;
+  font-size: var(--text-xl);
+  font-weight: var(--font-semibold);
   color: #3083ff;
   margin-left: 30%;
 }
@@ -367,9 +384,9 @@
 }
 
 .modal-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #333;
+  font-size: var(--text-xl);
+  font-weight: var(--font-semibold);
+  margin-bottom: 20px;
 }
 
 .close-button {
@@ -466,6 +483,37 @@
   cursor: pointer;
   width: 100%;
   height: 100%;
+}
+
+.scroll-to-top {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #0066cc;
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 1000;
+  border: none;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.scroll-to-top.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.scroll-to-top:hover {
+  background-color: #0052a3;
+  transform: translateY(-2px);
 }
 
 @media (max-width: 1200px) {

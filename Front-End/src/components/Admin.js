@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './Admin.css';
+import '../Styles/typography.css';
 import defaultproductImage from '../Images/bo4.png';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faTrash, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import { faEdit, faTrash, faSignOutAlt, faArrowUp } from '@fortawesome/free-solid-svg-icons';
 import { FaPlus } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import logo from '../Images/Logo.png';
@@ -22,6 +23,7 @@ const Admin = () => {
     image: null,
     imagePreview: null
   });
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   const token = localStorage.getItem('token');
 
@@ -65,6 +67,23 @@ const Admin = () => {
         Swal.fire('Error!', 'Failed to fetch bookings', 'error');
       });
   }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      setShowScrollTop(scrollY > 200);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
 
   const handleCloseModal = () => {
     setEditingProduct(null);
@@ -559,9 +578,9 @@ const Admin = () => {
               <select id="filtering" name='filterProduct' type="select" value={filterCategory} onChange={handleFilterChange}>
                 <option value="">Filter</option>
                 <option value="">All</option>
-                <option value="Cocktail">Cocktail</option>
-                <option value="Mocktail">Mocktail</option>
-                <option value="Boba">Boba</option>
+                <option value="Cocktail">ID Cards</option>
+                <option value="Mocktail">Accessories</option>
+                <option value="Boba">Others</option>
               </select>
               <input type='search' name='search' id='search' placeholder="Search" value={searchTerm} onChange={handleSearchChange} />
               <FaPlus className="plus-icon" onClick={() => setShowAddProductForm(true)} />
@@ -572,7 +591,7 @@ const Admin = () => {
                 <div className="admin-product-details">
                   <h3>{product.name}</h3>
                   <p>Category: {product.category}</p>
-                  <p>Price: GH¢{product.price}</p>
+                  
 
                 </div>
                 <div className="admin-product-actions">
@@ -596,6 +615,13 @@ const Admin = () => {
       </div>
       {showAddProductForm && renderAddProductModal()}
       {editingProduct && renderEditProductModal()}
+      <button 
+        className={`scroll-to-top ${showScrollTop ? 'visible' : ''}`}
+        onClick={scrollToTop}
+        aria-label="Scroll to top"
+      >
+        <FontAwesomeIcon icon={faArrowUp} />
+      </button>
     </div>
   );
 };

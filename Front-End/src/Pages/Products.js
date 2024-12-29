@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { API_BASE_URL, UPLOADS_URL } from '../config/api';
 import '../Styles/Products.css';
+import '../Styles/ScrollToTop.css';
+import ScrollToTop from '../components/ScrollToTop';
 
 function Products() {
   const [products, setProducts] = useState([]);
@@ -92,6 +94,7 @@ function Products() {
           View More Items
         </button>
       )}
+      <ScrollToTop />
     </div>
   );
 }

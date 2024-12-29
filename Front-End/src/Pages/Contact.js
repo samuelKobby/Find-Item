@@ -1,5 +1,7 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import '../Styles/Contact.css';
+import '../Styles/ScrollToTop.css';
+import ScrollToTop from '../components/ScrollToTop';
 
 const Contact = () => {
   const contactSectionRef = useRef(null);
@@ -51,6 +53,7 @@ const Contact = () => {
         </div>
       </div>
       <div className="CU-Section3"></div>
+      <ScrollToTop />
     </div>
   );
 }

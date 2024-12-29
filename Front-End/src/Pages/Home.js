@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import '../Styles/Home.css';
+import '../Styles/ScrollToTop.css';
 import image from '../Images/Picture1.png';
 import bablue from '../Images/Picture2.png';
 import bobablu from '../Images/Picture3.jpg';
@@ -12,6 +13,7 @@ import straw from '../Images/Books.jpg';
 import nonalco from '../Images/gadgets.jpg';
 import mockn from '../Images/others.jpg';
 import reviewImage from '../Images/profile.jpeg';
+import ScrollToTop from '../components/ScrollToTop';
 
 const images = [bablue, bobablu, bobabl, bobab];
 
@@ -35,7 +37,7 @@ const Home = () => {
   }, []);
 
   return (
-    <>
+    <div>
       <div className="homepage" id="homepage">
         <div className="content" id="content">
           <h1 className="title" id="title">Find What You Lost, <br /> Quickly and Easily.</h1>
@@ -143,7 +145,8 @@ const Home = () => {
           </div>
         </div>
       </div>
-    </>
+      <ScrollToTop />
+    </div>
   );
 };
 
