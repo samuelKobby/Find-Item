@@ -113,7 +113,8 @@ const Admin = () => {
   const handleEditProduct = (product) => {
     setEditingProduct({
       ...product,
-      imagePreview: product.image // The image is already a base64 string
+      imagePreview: null, // Reset imagePreview when starting to edit
+      image: product.image // Keep the current image URL
     });
   };
 
@@ -128,34 +129,50 @@ const Admin = () => {
         formData.append('image', editingProduct.image);
       }
 
-      // Make sure to use the correct endpoint
       const response = await fetch(`${API_BASE_URL}/api/products/${editingProduct._id}`, {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${getAuthToken()}`,
-          'Content-Type': 'multipart/form-data'
+          'Authorization': `Bearer ${getAuthToken()}`
         },
-        body: formData,
+        credentials: 'include',
+        body: formData
       });
 
-      const data = await response.text();
-      console.log('Server response:', data);
+      const responseText = await response.text();
+      console.log('Server response:', responseText);
 
       if (!response.ok) {
         try {
-          const errorData = JSON.parse(data);
+          const errorData = JSON.parse(responseText);
           throw new Error(errorData.error || 'Failed to update product');
         } catch (e) {
-          throw new Error('Failed to update product: ' + data);
+          throw new Error('Failed to update product: ' + responseText);
         }
       }
 
-      const updatedProduct = JSON.parse(data);
+      let updatedProduct;
+      try {
+        updatedProduct = JSON.parse(responseText);
+      } catch (e) {
+        throw new Error('Invalid response from server');
+      }
+
+      // Update the product in the state with the correct image URL
+      const productWithImage = {
+        ...updatedProduct,
+        image: updatedProduct.image ? (
+          updatedProduct.image.startsWith('http') ? 
+            updatedProduct.image : 
+            `${API_BASE_URL}/api/uploads/${updatedProduct.image}`
+        ) : defaultproductImage
+      };
+
       setProducts(prevProducts =>
         prevProducts.map(product =>
-          product._id === editingProduct._id ? updatedProduct : product
+          product._id === editingProduct._id ? productWithImage : product
         )
       );
+      
       setEditingProduct(null);
       Swal.fire('Success!', 'Product updated successfully', 'success');
     } catch (error) {
@@ -199,15 +216,18 @@ const Admin = () => {
       }
 
       const data = JSON.parse(responseText);
+
+      // Create a new product object with the correct image URL
       const newProductWithImage = {
         ...data,
         image: data.image ? (
           data.image.startsWith('http') ? 
             data.image : 
             `${API_BASE_URL}/api/uploads/${data.image}`
-        ) : null
+        ) : defaultproductImage
       };
-      setProducts([...products, newProductWithImage]);
+
+      setProducts(prevProducts => [...prevProducts, newProductWithImage]);
       setShowAddProductForm(false);
       setNewProduct({ name: '', category: '', image: null, imagePreview: null });
       Swal.fire('Success!', 'Product added successfully', 'success');
@@ -417,7 +437,6 @@ const Admin = () => {
             className="form-input"
             value={editingProduct.name}
             onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })}
-            placeholder="Enter item name"
           />
         </div>
 
@@ -439,22 +458,25 @@ const Admin = () => {
           <label className="form-label">Image</label>
           <div className="file-input-wrapper">
             <div className="file-input-button">
-              {editingProduct.image ? 'Change Image' : 'Choose Image'}
+              Change Image
             </div>
             <input
               type="file"
               className="file-input"
               accept="image/*"
-              onChange={async (e) => {
+              onChange={(e) => {
                 const file = e.target.files[0];
                 if (file) {
                   if (file.type.startsWith('image/')) {
-                    const imageUrl = await handleImageUpload(file);
-                    setEditingProduct({
-                      ...editingProduct,
-                      image: file,
-                      imagePreview: imageUrl
-                    });
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      setEditingProduct({
+                        ...editingProduct,
+                        image: file,
+                        imagePreview: reader.result
+                      });
+                    };
+                    reader.readAsDataURL(file);
                   } else {
                     Swal.fire('Error!', 'Please upload an image file', 'error');
                     e.target.value = '';
@@ -463,14 +485,16 @@ const Admin = () => {
               }}
             />
           </div>
-          {(editingProduct.imagePreview || editingProduct.image) && (
-            <div className="image-preview">
-              <img 
-                src={editingProduct.imagePreview || `${UPLOADS_URL}/${editingProduct.image}`}
-                alt="Preview"
-              />
-            </div>
-          )}
+          <div className="image-preview">
+            <img 
+              src={editingProduct.imagePreview || editingProduct.image || defaultproductImage}
+              alt="Preview"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = defaultproductImage;
+              }}
+            />
+          </div>
         </div>
 
         <button className="submit-button" onClick={handleSaveProduct}>
