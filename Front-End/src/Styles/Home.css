@@ -8,10 +8,11 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 630px;        
-  background-size: contain;
+  min-height: 630px;
+  background-size: cover;
   background-position: center;
   padding: 25px;
+  position: relative;
 }
 
 #homepage {
@@ -46,7 +47,6 @@ body {
     opacity: 1;
   }
 }
-
 
 #boba{
   background-image: url('/src/Images/Accessories.jpg');
@@ -87,23 +87,24 @@ body {
 }
 
 .content {
-  text-align: left;
+  text-align: center;
+  color: white;
+  z-index: 2;
   padding: 20px;
-  border-radius: 10px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .content .title {
-  font-size: 4em;
-  font-weight: 800;
+  font-size: 3rem;
   margin-bottom: 20px;
-  color: rgb(255, 255, 255);
+  line-height: 1.2;
 }
 
 .content .description {
-  font-size: 1.2vw;
-  margin-bottom: 20px;
-  color: white !important;
-  line-height: 1.5;
+  font-size: 1.2rem;
+  line-height: 1.6;
+  margin-bottom: 30px;
 }
 
 .content .cta-button {
@@ -217,8 +218,6 @@ a:hover{
   justify-content: center;
   gap: 2px;
   margin-top: 20px;
-  
-  
 }
 
 .section3 .grid-item {
@@ -228,7 +227,6 @@ a:hover{
   text-align: center;
   flex: 1 1 calc(33.333% - 40px);
   max-width: calc(33.333% - 40px);
-  
 }
 
 .section3 .grid-item .circle {
@@ -330,6 +328,92 @@ a:hover{
   color: #ffc107;
   margin-top: 10px;
 }
+
+/* Mobile Responsiveness */
+@media screen and (max-width: 768px) {
+  .homepage {
+    min-height: 450px;
+    padding: 15px;
+  }
+
+  .content {
+    padding: 15px;
+  }
+
+  .content .title {
+    font-size: 2rem;
+    margin-bottom: 15px;
+  }
+
+  .content .description {
+    font-size: 1rem;
+    line-height: 1.4;
+    margin-bottom: 20px;
+  }
+
+  .section1,
+  .section2,
+  .section3,
+  .section4 {
+    padding: 30px 15px;
+  }
+
+  .card-container {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 15px;
+  }
+
+  .card {
+    width: 100%;
+    margin: 10px 0;
+  }
+
+  .review-container {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .review-image {
+    margin: 0 0 15px 0;
+  }
+
+  .section-title {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+  }
+
+  .section-description {
+    font-size: 1rem;
+    margin-bottom: 30px;
+  }
+}
+
+/* Tablet Responsiveness */
+@media screen and (min-width: 769px) and (max-width: 1024px) {
+  .homepage {
+    min-height: 500px;
+  }
+
+  .content .title {
+    font-size: 2.5rem;
+  }
+
+  .card-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    padding: 20px;
+  }
+
+  .section1,
+  .section2,
+  .section3,
+  .section4 {
+    padding: 40px 20px;
+  }
+}
+
 @media (max-width: 1024px) {
   .section3 .grid-item {
     flex: 1 1 calc(50% - 40px);
@@ -360,12 +444,9 @@ a:hover{
   .homepage{
     padding-top: 20%;
   }
-  
 }
 
 @media (max-width: 480px) {
-  
-
   .section3 .grid-item {
     flex: 1 1 100%;
     max-width: 100%;
@@ -376,7 +457,6 @@ a:hover{
     height: 120px;
   }
 }
-
 
 @media (max-width: 768px) {
   .content .title {
@@ -490,7 +570,6 @@ a:hover{
     font-size: 12px;
   }
 }
-
 
 @media (min-width: 768px) {
   .section4 .reviews {

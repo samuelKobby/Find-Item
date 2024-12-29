@@ -28,6 +28,9 @@ body {
   padding: 20px;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease-in-out;
+  position: fixed;
+  height: 100vh;
+  z-index: 1000;
 }
 
 #logo {
@@ -80,6 +83,7 @@ body {
   flex: 1;
   padding: 20px;
   overflow-y: auto;
+  margin-left: 200px;
 }
 
 .dashboard-overview {
@@ -516,33 +520,20 @@ body {
   transform: translateY(-2px);
 }
 
-@media (max-width: 1200px) {
-  #admin-sidebar {
-    width: 150px;
-  }
-
-  .admin-product-card {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .admin-product-image {
-    margin-bottom: 10px;
-  }
-}
-
-@media (max-width: 768px) {
+@media screen and (max-width: 768px) {
   #admin-main-container {
     flex-direction: column;
   }
 
   #admin-sidebar {
     width: 100%;
-    flex-direction: row;
-    justify-content: space-around;
+    height: auto;
+    position: relative;
+    padding: 10px;
   }
 
   #admin-content {
+    margin-left: 0;
     padding: 10px;
   }
 
@@ -551,12 +542,68 @@ body {
   }
 
   .dashboard-card {
-    margin-bottom: 20px;
+    min-width: 100%;
   }
 
-  .active-projects table,
-  .active-projects th,
-  .active-projects td {
-    font-size: 14px;
+  .product-header {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .product-header select,
+  .product-header input {
+    width: 100%;
+    margin: 5px 0;
+  }
+
+  #admin-modal-content {
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .admin-product-card {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .admin-product-image {
+    width: 80px;
+    height: 80px;
+    margin: 10px auto;
+  }
+
+  .admin-product-details {
+    width: 100%;
+  }
+
+  .product-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .product-table th,
+  .product-table td {
+    min-width: 120px;
+  }
+
+  .logout-icon {
+    position: static;
+    margin: 10px auto;
+  }
+}
+
+@media screen and (min-width: 769px) and (max-width: 1024px) {
+  #admin-sidebar {
+    width: 150px;
+  }
+
+  #admin-content {
+    margin-left: 150px;
+  }
+
+  .dashboard-card {
+    min-width: 45%;
   }
 }
