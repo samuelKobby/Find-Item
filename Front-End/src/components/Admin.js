@@ -69,14 +69,19 @@ const Admin = () => {
         throw new Error('Failed to fetch products');
       }
       const productsData = await productsResponse.json();
-      setProducts(productsData.map(product => ({
+      console.log('Fetched products:', productsData);
+
+      const productsWithImages = productsData.map(product => ({
         ...product,
         image: product.image ? (
           product.image.startsWith('http') ? 
             product.image : 
-            `${API_BASE_URL}/api/uploads/${product.image}`
+            `${API_BASE_URL}/api/uploads/${product.image}?t=${Date.now()}`
         ) : defaultproductImage
-      })));
+      }));
+
+      console.log('Products with images:', productsWithImages);
+      setProducts(productsWithImages);
 
       // Fetch bookings
       const bookingsResponse = await fetch(`${API_BASE_URL}/api/bookings`, { 
@@ -163,7 +168,7 @@ const Admin = () => {
         image: updatedProduct.image ? (
           updatedProduct.image.startsWith('http') ? 
             updatedProduct.image : 
-            `${API_BASE_URL}/api/uploads/${updatedProduct.image}`
+            `${API_BASE_URL}/api/uploads/${updatedProduct.image}?t=${Date.now()}`
         ) : defaultproductImage
       };
 
@@ -216,6 +221,7 @@ const Admin = () => {
       }
 
       const data = JSON.parse(responseText);
+      console.log('Parsed response data:', data);
 
       // Create a new product object with the correct image URL
       const newProductWithImage = {
@@ -223,9 +229,11 @@ const Admin = () => {
         image: data.image ? (
           data.image.startsWith('http') ? 
             data.image : 
-            `${API_BASE_URL}/api/uploads/${data.image}`
+            `${API_BASE_URL}/api/uploads/${data.image}?t=${Date.now()}`
         ) : defaultproductImage
       };
+
+      console.log('New product with image:', newProductWithImage);
 
       setProducts(prevProducts => [...prevProducts, newProductWithImage]);
       setShowAddProductForm(false);
@@ -536,9 +544,10 @@ const Admin = () => {
           <div key={product._id} className="product-card">
             <div className="product-image">
               <img
-                src={product.image || defaultproductImage}
+                src={product.image}
                 alt={product.name}
                 onError={(e) => {
+                  console.log('Image load error for:', product.name, product.image);
                   e.target.onerror = null;
                   e.target.src = defaultproductImage;
                 }}
