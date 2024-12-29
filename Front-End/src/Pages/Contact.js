@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import '../Styles/Contact.css';
 import '../Styles/ScrollToTop.css';
 import ScrollToTop from '../components/ScrollToTop';
