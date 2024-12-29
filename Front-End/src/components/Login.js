@@ -26,8 +26,7 @@ const Login = ({ setAuth }) => {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
-        body: JSON.stringify({ username, password }),
-        credentials: 'include'
+        body: JSON.stringify({ username, password })
       });
 
       if (!response.ok) {
@@ -51,7 +50,9 @@ const Login = ({ setAuth }) => {
         }
 
         // Update auth state
-        setAuth(true);
+        if (typeof setAuth === 'function') {
+          setAuth(true);
+        }
         
         // Redirect to admin dashboard
         navigate('/admin');

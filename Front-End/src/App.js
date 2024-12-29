@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -17,7 +17,16 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { isAuthenticated } from './utils/auth';
 
 function App() {
-  const [isAuth, setIsAuth] = useState(false);
+  const [isAuth, setIsAuth] = useState(isAuthenticated());
+
+  useEffect(() => {
+    // Update auth state when localStorage changes
+    const handleStorageChange = () => {
+      setIsAuth(isAuthenticated());
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   // Component to handle conditional footer rendering
   const AppContent = () => {
@@ -50,9 +59,11 @@ function App() {
           <Route 
             path="/login" 
             element={
-              isAuthenticated() ? 
-                <Navigate to="/admin" /> : 
+              isAuthenticated() ? (
+                <Navigate to="/admin" />
+              ) : (
                 <Login setAuth={setIsAuth} />
+              )
             }
           />
         </Routes>
