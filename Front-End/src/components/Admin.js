@@ -75,7 +75,7 @@ const Admin = () => {
           product.image.startsWith('http') ? 
             product.image : 
             `${API_BASE_URL}/api/uploads/${product.image}`
-        ) : null
+        ) : defaultproductImage
       })));
 
       // Fetch bookings
@@ -480,6 +480,64 @@ const Admin = () => {
     </div>
   );
 
+  const renderProducts = () => (
+    <div className="admin-products">
+      <div className="admin-header">
+        <div className="search-filter">
+          <input
+            type="text"
+            placeholder="Search items..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+            className="search-input"
+          />
+          <select
+            value={filterCategory}
+            onChange={handleFilterChange}
+            className="filter-select"
+          >
+            <option value="">All Categories</option>
+            {categories.map((cat) => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
+        </div>
+        <button className="add-product-button" onClick={() => setShowAddProductForm(true)}>
+          <FaPlus /> Add Item
+        </button>
+      </div>
+
+      <div className="products-grid">
+        {filteredProducts.map((product) => (
+          <div key={product._id} className="product-card">
+            <div className="product-image">
+              <img
+                src={product.image || defaultproductImage}
+                alt={product.name}
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = defaultproductImage;
+                }}
+              />
+            </div>
+            <div className="product-details">
+              <h3>{product.name}</h3>
+              <p>Category: {product.category}</p>
+              <div className="product-actions">
+                <button onClick={() => handleEditProduct(product)} className="edit-button">
+                  <FontAwesomeIcon icon={faEdit} /> Edit
+                </button>
+                <button onClick={() => handleDeleteProduct(product._id)} className="delete-button">
+                  <FontAwesomeIcon icon={faTrash} /> Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
   return (
     <div id="admin-main-container">
       <div id="admin-sidebar">
@@ -634,44 +692,7 @@ const Admin = () => {
           </div>
         )}
         {selectedSection === 'previewProducts' && (
-          <div id="admin-products-section">
-            <div className='filter-and-search'>
-              <select id="filtering" name='filterProduct' type="select" value={filterCategory} onChange={handleFilterChange}>
-                <option value="">Filter</option>
-                <option value="">All</option>
-                <option value="ID Cards">ID Cards</option>
-                <option value="Accessory">Accessories</option>
-                <option value="Others">Others</option>
-              </select>
-              <input type='search' name='search' id='search' placeholder="Search" value={searchTerm} onChange={handleSearchChange} />
-              <FaPlus className="plus-icon" onClick={() => setShowAddProductForm(true)} />
-            </div>
-            {filteredProducts.map(product => (
-              <div className="admin-product-card" key={product.id}>
-                <img src={product.image} alt={product.image} className="admin-product-image" />
-                <div className="admin-product-details">
-                  <h3>{product.name}</h3>
-                  <p>Category: {product.category}</p>
-                  
-
-                </div>
-                <div className="admin-product-actions">
-                  <FontAwesomeIcon
-                    icon={faEdit}
-                    onClick={() => handleEditProduct(product)}
-                    className="admin-edit-button"
-                    style={{ cursor: 'pointer', fontSize: '20px' }}
-                  />
-                  <FontAwesomeIcon
-                    icon={faTrash}
-                    onClick={() => handleDeleteProduct(product._id)}
-                    className="admin-delete-button"
-                    style={{ cursor: 'pointer', fontSize: '20px', marginLeft: '10px' }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
+          renderProducts()
         )}
       </div>
       {showAddProductForm && renderAddProductModal()}
