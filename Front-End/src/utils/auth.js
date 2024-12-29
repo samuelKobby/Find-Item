@@ -8,12 +8,13 @@ export const checkAuthStatus = async () => {
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}/auth/verify`, {
+    const response = await fetch(`${API_BASE_URL}/api/auth/verify`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
-      }
+      },
+      credentials: 'include'
     });
 
     if (!response.ok) {
@@ -21,9 +22,10 @@ export const checkAuthStatus = async () => {
       return false;
     }
 
-    return true;
+    const data = await response.json();
+    return data.success;
   } catch (error) {
-    console.error('Auth check failed:', error);
+    console.error('Auth check error:', error);
     localStorage.removeItem('token');
     return false;
   }

@@ -126,6 +126,24 @@ exports.loginAdmin = async (req, res) => {
   }
 };
 
+// Verify token
+exports.verifyToken = async (req, res) => {
+  try {
+    // If we reach here, it means the token is valid (thanks to protect middleware)
+    // Return the user information
+    res.json({
+      success: true,
+      admin: {
+        id: req.admin.id,
+        username: req.admin.username
+      }
+    });
+  } catch (error) {
+    console.error('Token verification error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 // Logout admin
 exports.logout = async (req, res) => {
   try {
