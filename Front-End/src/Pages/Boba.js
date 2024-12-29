@@ -64,29 +64,38 @@ function Boba() {
   }, []);
 
   return (
-    <div className="products-container">
-      <div className="product-head">
-        <h1>Other Lost Items</h1>
+    <div className="product-main">
+      <div className="homepage" id='products'>
+        <div className="content">
+          <h1 className="title">Find Your <br />Missing Belongings</h1>
+          <p className="description">
+            Lost something on campus? <br />Discover our reliable platform to help you<br /> 
+            locate your lost items with ease.
+          </p>
+        </div>
       </div>
 
-      {error && <div className="error-message">{error}</div>}
-      <div className="products-grid">
-        {products.slice(0, visibleProducts).map((product) => (
-          <div key={product._id} className="product-card">
+      <div className="product-head">
+        <h1>Other Lost Items</h1>
+        <p>
+          Looking for something else? <br />Browse through our collection of miscellaneous items. <br />Your lost item might be among them.
+        </p>
+      </div>
+      <div className="product-grid">
+        {error && <p className="error">{error}</p>}
+        {products.slice(0, visibleProducts).map((product, index) => (
+          <div key={product._id || index} className="product-card">
             <div className="product-image">
-              <img 
+              <img
                 src={product.image || '/default-image.jpg'} 
                 alt={product.name} 
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = '/default-image.jpg';
-                }}
+                onError={(e) => { e.target.src = '/default-image.jpg'; }} 
               />
             </div>
             <div className="product-info">
               <h3>{product.name}</h3>
-              <p>{product.description}</p>
               <p>Category: {product.category}</p>
+              <p>Details: {product.price}</p> 
             </div>
           </div>
         ))}
