@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Admin.css';
 import '../Styles/typography.css';
 import defaultproductImage from '../Images/bo4.png';
@@ -6,9 +7,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faTrash, faSignOutAlt, faArrowUp } from '@fortawesome/free-solid-svg-icons';
 import { FaPlus } from 'react-icons/fa';
 import Swal from 'sweetalert2';
-import logo from '../Images/Logo.png';
+import { API_BASE_URL, UPLOADS_URL } from '../config/api';
+import { getAuthToken, logout } from '../utils/auth';
 
 const Admin = () => {
+  const navigate = useNavigate();
   const [selectedSection, setSelectedSection] = useState('dashboard');
   const [products, setProducts] = useState([]);
   const [bookings, setBookings] = useState([]);
@@ -25,58 +28,63 @@ const Admin = () => {
   });
   const [showScrollTop, setShowScrollTop] = useState(false);
 
-  const token = localStorage.getItem('token');
-
   const categories = ['ID Card', 'Accessory', 'Others']
 
   useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 300);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    const token = getAuthToken();
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+
     const headers = {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
     };
 
-    // Fetch products
-    fetch('https://find-item.vercel.app/api/products', {
-      headers
-    })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Failed to fetch products');
+    try {
+      // Fetch products
+      const productsResponse = await fetch(`${API_BASE_URL}/products`, { headers });
+      if (!productsResponse.ok) {
+        if (productsResponse.status === 401) {
+          logout();
+          navigate('/login');
+          return;
         }
-        return response.json();
-      })
-      .then(data => setProducts(data))
-      .catch(error => {
-        console.error('Error fetching products:', error);
-        Swal.fire('Error!', 'Failed to fetch products', 'error');
-      });
+        throw new Error('Failed to fetch products');
+      }
+      const productsData = await productsResponse.json();
+      setProducts(productsData);
 
-    // Fetch bookings
-    fetch('https://find-item.vercel.app/api/bookings', {
-      headers
-    })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Failed to fetch bookings');
+      // Fetch bookings
+      const bookingsResponse = await fetch(`${API_BASE_URL}/bookings`, { headers });
+      if (!bookingsResponse.ok) {
+        if (bookingsResponse.status === 401) {
+          logout();
+          navigate('/login');
+          return;
         }
-        return response.json();
-      })
-      .then(data => setBookings(data))
-      .catch(error => {
-        console.error('Error fetching bookings:', error);
-        Swal.fire('Error!', 'Failed to fetch bookings', 'error');
-      });
-  }, []);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-      setShowScrollTop(scrollY > 200);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+        throw new Error('Failed to fetch bookings');
+      }
+      const bookingsData = await bookingsResponse.json();
+      setBookings(bookingsData);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      Swal.fire('Error!', error.message, 'error');
+    }
+  };
 
   const scrollToTop = () => {
     window.scrollTo({
@@ -108,10 +116,11 @@ const Admin = () => {
       }
 
       // Make sure to use the correct endpoint
-      const response = await fetch(`https://find-item.vercel.app/api/products/${editingProduct._id}`, {
+      const response = await fetch(`${API_BASE_URL}/products/${editingProduct._id}`, {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${getAuthToken()}`,
+          'Content-Type': 'multipart/form-data'
         },
         body: formData,
       });
@@ -160,10 +169,11 @@ const Admin = () => {
         image: newProduct.image.name
       });
 
-      const response = await fetch('https://find-item.vercel.app/api/products/add', {
+      const response = await fetch(`${API_BASE_URL}/products/add`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${getAuthToken()}`,
+          'Content-Type': 'multipart/form-data'
         },
         body: formData
       });
@@ -239,7 +249,7 @@ const Admin = () => {
 
     if (result.isConfirmed) {
       try {
-        await fetch(`https://find-item.vercel.app/api/bookings/${id}`, { method: 'DELETE' });
+        await fetch(`${API_BASE_URL}/bookings/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${getAuthToken()}` } });
         setBookings(bookings.filter(booking => booking._id !== id));
         Swal.fire('Deleted!', 'The booking has been deleted.', 'success');
       } catch (error) {
@@ -262,10 +272,10 @@ const Admin = () => {
     if (result.isConfirmed) {
       try {
         // Update the API endpoint (remove /delete from the URL)
-        const response = await fetch(`https://find-item.vercel.app/api/products/${productId}`, {
+        const response = await fetch(`${API_BASE_URL}/products/${productId}`, {
           method: 'DELETE',
           headers: {
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${getAuthToken()}`
           }
         });
   
@@ -284,9 +294,8 @@ const Admin = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    window.location.href = '/login';
+    logout();
+    navigate('/login');
   };
 
   const filteredProducts = products.filter(product => {
@@ -405,7 +414,7 @@ const Admin = () => {
           {(editingProduct.imagePreview || editingProduct.image) && (
             <div className="image-preview">
               <img 
-                src={editingProduct.imagePreview || `https://find-item.vercel.app/uploads/${editingProduct.image}`}
+                src={editingProduct.imagePreview || `${UPLOADS_URL}/${editingProduct.image}`}
                 alt="Preview"
               />
             </div>
@@ -423,7 +432,7 @@ const Admin = () => {
     <div id="admin-main-container">
       <div id="admin-sidebar">
         <div id="logo" >
-          <img src={logo} alt="Logo" className="logo" />
+          <img src={defaultproductImage} alt="Logo" className="logo" />
         </div>
         <div className="admin-sidebar-item" onClick={() => setSelectedSection('dashboard')}>Dashboard</div>
         <div className="admin-sidebar-item" onClick={() => setSelectedSection('bookings')}>Bookings</div>
@@ -578,9 +587,9 @@ const Admin = () => {
               <select id="filtering" name='filterProduct' type="select" value={filterCategory} onChange={handleFilterChange}>
                 <option value="">Filter</option>
                 <option value="">All</option>
-                <option value="Cocktail">ID Cards</option>
-                <option value="Mocktail">Accessories</option>
-                <option value="Boba">Others</option>
+                <option value="ID Cards">ID Cards</option>
+                <option value="Accessories">Accessories</option>
+                <option value="Others">Others</option>
               </select>
               <input type='search' name='search' id='search' placeholder="Search" value={searchTerm} onChange={handleSearchChange} />
               <FaPlus className="plus-icon" onClick={() => setShowAddProductForm(true)} />
