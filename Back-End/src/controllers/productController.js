@@ -1,7 +1,7 @@
 const Product = require('../models/productModel');
 const multer = require('multer');
 const { storage } = require('../config/firebase');
-const { ref, uploadBytes, getDownloadURL } = require('firebase/storage');
+const { ref, uploadBytes, getDownloadURL, deleteObject } = require('firebase/storage');
 
 // Configure multer for memory storage
 const upload = multer({
@@ -12,7 +12,10 @@ const upload = multer({
   fileFilter: function (req, file, cb) {
     // Accept images only
     if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/i)) {
-      return cb(new Error('Only image files are allowed!'), false);
+      return cb(new Error('Only image files (jpg, jpeg, png, gif) are allowed!'), false);
+    }
+    if (!file.mimetype.startsWith('image/')) {
+      return cb(new Error('Invalid file type. Only images are allowed!'), false);
     }
     cb(null, true);
   }
@@ -31,36 +34,45 @@ exports.addProduct = async (req, res) => {
     try {
       const { name, category } = req.body;
       
+      if (!name || !category) {
+        return res.status(400).json({ error: 'Name and category are required' });
+      }
+
       if (!req.file) {
         return res.status(400).json({ error: 'Image is required' });
       }
 
       // Create a unique filename
       const timestamp = Date.now();
-      const fileName = `${timestamp}-${req.file.originalname}`;
+      const fileName = `${timestamp}-${req.file.originalname.replace(/[^a-zA-Z0-9.]/g, '_')}`;
       
       // Create a reference to Firebase Storage
       const storageRef = ref(storage, `products/${fileName}`);
       
-      // Upload the file buffer to Firebase
-      await uploadBytes(storageRef, req.file.buffer);
-      
-      // Get the download URL
-      const imageUrl = await getDownloadURL(storageRef);
+      try {
+        // Upload the file buffer to Firebase
+        await uploadBytes(storageRef, req.file.buffer);
+        
+        // Get the download URL
+        const imageUrl = await getDownloadURL(storageRef);
 
-      console.log('File uploaded successfully:', imageUrl);
+        // Create and save the product
+        const product = new Product({
+          name,
+          category,
+          imageUrl,
+          fileName // Store filename for future deletion if needed
+        });
 
-      const product = new Product({
-        name,
-        category,
-        image: imageUrl // Store the download URL in the database
-      });
-
-      await product.save();
-      res.status(201).json(product);
+        await product.save();
+        res.status(201).json(product);
+      } catch (error) {
+        console.error('Firebase operation error:', error);
+        res.status(500).json({ error: 'Error uploading image to storage' });
+      }
     } catch (error) {
-      console.error('Product creation error:', error);
-      res.status(400).json({ error: error.message });
+      console.error('Server error:', error);
+      res.status(500).json({ error: 'Server error' });
     }
   });
 };
@@ -79,10 +91,18 @@ exports.updateProduct = async (req, res) => {
       if (req.file) {
         // Upload new image to Firebase
         const timestamp = Date.now();
-        const fileName = `${timestamp}-${req.file.originalname}`;
+        const fileName = `${timestamp}-${req.file.originalname.replace(/[^a-zA-Z0-9.]/g, '_')}`;
         const storageRef = ref(storage, `products/${fileName}`);
-        await uploadBytes(storageRef, req.file.buffer);
-        imageUrl = await getDownloadURL(storageRef);
+        try {
+          // Upload the file buffer to Firebase
+          await uploadBytes(storageRef, req.file.buffer);
+          
+          // Get the download URL
+          imageUrl = await getDownloadURL(storageRef);
+        } catch (error) {
+          console.error('Firebase operation error:', error);
+          res.status(500).json({ error: 'Error uploading image to storage' });
+        }
       }
 
       const product = await Product.findById(req.params.id);
@@ -92,13 +112,13 @@ exports.updateProduct = async (req, res) => {
 
       product.name = name || product.name;
       product.category = category || product.category;
-      product.image = imageUrl || product.image;
+      product.imageUrl = imageUrl || product.imageUrl;
 
       await product.save();
       res.status(200).json(product);
     } catch (error) {
-      console.error('Product update error:', error);
-      res.status(400).json({ error: error.message });
+      console.error('Server error:', error);
+      res.status(500).json({ error: 'Server error' });
     }
   });
 };
@@ -132,6 +152,18 @@ exports.deleteProduct = async (req, res) => {
     if (!product) {
       return res.status(404).json({ error: 'Product not found' });
     }
+    
+    // Delete the product image from Firebase Storage
+    if (product.fileName) {
+      const storageRef = ref(storage, `products/${product.fileName}`);
+      try {
+        await deleteObject(storageRef);
+      } catch (error) {
+        console.error('Firebase operation error:', error);
+        res.status(500).json({ error: 'Error deleting image from storage' });
+      }
+    }
+
     res.status(200).json({ message: 'Product removed' });
   } catch (error) {
     console.error('Product deletion error:', error);

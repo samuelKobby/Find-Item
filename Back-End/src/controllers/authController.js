@@ -3,21 +3,42 @@ const jwt = require('jsonwebtoken');
 const Admin = require('../models/admin');
 const TokenBlacklist = require('../models/TokenBlacklist');
 
+// Password validation
+const isPasswordValid = (password) => {
+  return password.length >= 8 && // at least 8 characters
+         /[A-Z]/.test(password) && // at least one uppercase
+         /[a-z]/.test(password) && // at least one lowercase
+         /[0-9]/.test(password) && // at least one number
+         /[^A-Za-z0-9]/.test(password); // at least one special character
+};
+
 // Register a new admin
 exports.registerAdmin = async (req, res) => {
   const { username, password } = req.body;
 
   try {
+    // Validate input
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Username and password are required' });
+    }
+
+    // Validate password strength
+    if (!isPasswordValid(password)) {
+      return res.status(400).json({
+        error: 'Password must be at least 8 characters long and contain uppercase, lowercase, number, and special character'
+      });
+    }
+
     // Check if the admin already exists
     let admin = await Admin.findOne({ username });
     if (admin) {
-      return res.status(400).json({ msg: 'Admin already exists' });
+      return res.status(400).json({ error: 'Admin already exists' });
     }
 
     // Create a new admin
     admin = new Admin({
       username,
-      password,
+      password: bcrypt.hashSync(password, 10), // hash password
     });
 
     // Save the admin to the database
@@ -48,32 +69,31 @@ exports.registerAdmin = async (req, res) => {
       }
     );
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server error');
+    console.error('Registration error:', err.message);
+    res.status(500).json({ error: 'Server error during registration' });
   }
 };
 
-// Authenticate admin and get token
+// Login admin
 exports.loginAdmin = async (req, res) => {
   const { username, password } = req.body;
-  console.log('Login attempt for username:', username); // Debug log
 
   try {
-    // Check if admin exists
-    const admin = await Admin.findOne({ username });
-    console.log('Found admin:', admin ? 'Yes' : 'No'); // Debug log
+    // Validate input
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Username and password are required' });
+    }
 
+    // Find admin by username
+    const admin = await Admin.findOne({ username });
     if (!admin) {
-      return res.status(400).json({ msg: 'Invalid credentials' });
+      return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     // Check password
-    console.log('Checking password...'); // Debug log
-    const isMatch = await admin.matchPassword(password);
-    console.log('Password match:', isMatch ? 'Yes' : 'No'); // Debug log
-
+    const isMatch = await bcrypt.compare(password, admin.password);
     if (!isMatch) {
-      return res.status(400).json({ msg: 'Invalid credentials' });
+      return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     // Generate JWT token
@@ -81,7 +101,7 @@ exports.loginAdmin = async (req, res) => {
       admin: {
         id: admin.id,
         username: admin.username
-      },
+      }
     };
 
     jwt.sign(
@@ -89,11 +109,8 @@ exports.loginAdmin = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '1h' },
       (err, token) => {
-        if (err) {
-          console.error('JWT Sign error:', err); // Debug log
-          throw err;
-        }
-        res.json({ 
+        if (err) throw err;
+        res.json({
           success: true,
           token,
           admin: {
@@ -104,22 +121,30 @@ exports.loginAdmin = async (req, res) => {
       }
     );
   } catch (err) {
-    console.error('Login error:', err); // Detailed error logging
-    res.status(500).json({ msg: 'Server error', error: err.message });
+    console.error('Login error:', err.message);
+    res.status(500).json({ error: 'Server error during login' });
   }
 };
 
-// Logout admin and blacklist token
-exports.logout = (req, res) => {
-  const token = req.headers.authorization.split(' ')[1];
+// Logout admin
+exports.logout = async (req, res) => {
+  try {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    
+    if (!token) {
+      return res.status(401).json({ error: 'No token provided' });
+    }
 
-  if (!token) {
-    return res.status(400).json({ message: 'No token provided' });
+    // Add token to blacklist
+    const blacklistedToken = new TokenBlacklist({
+      token,
+      expiresAt: new Date(Date.now() + 3600000) // 1 hour from now
+    });
+
+    await blacklistedToken.save();
+    res.json({ message: 'Logged out successfully' });
+  } catch (err) {
+    console.error('Logout error:', err.message);
+    res.status(500).json({ error: 'Server error during logout' });
   }
-
-  // Blacklist the token
-  const blacklistToken = new TokenBlacklist({ token });
-  blacklistToken.save()
-    .then(() => res.status(200).json({ message: 'Logged out successfully' }))
-    .catch(err => res.status(500).json({ message: 'Error logging out', error: err }));
 };

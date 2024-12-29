@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
 
-const BACKEND_URL = 'https://find-item.vercel.app';
+
 
 const Login = ({ setAuth }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -19,17 +19,15 @@ const Login = ({ setAuth }) => {
 
     try {
       const endpoint = isLogin ? 'login' : 'register';
-      const url = `${BACKEND_URL}/api/auth/${endpoint}`;
+      
       console.log('Making request to:', url); // Debug log
 
-      const response = await fetch(url, {
+      const response = await fetch(`https://find-item.vercel.app/api/auth/${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
         },
         body: JSON.stringify({ username, password }),
-        credentials: 'include',
         mode: 'cors'
       });
 
