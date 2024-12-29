@@ -23,7 +23,9 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(cors({
   origin: ['https://finditem.netlify.app', 'http://localhost:3000'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept'],
+  credentials: true,
+  maxAge: 86400 // 24 hours
 }));
 
 // Mount routes
