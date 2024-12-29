@@ -185,10 +185,10 @@ const Admin = () => {
       const response = await fetch(`${API_BASE_URL}/api/products/add`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${getAuthToken()}`,
-          'Content-Type': 'multipart/form-data'
+          'Authorization': `Bearer ${getAuthToken()}`
         },
-        body: formData
+        body: formData,
+        credentials: 'include'
       });
 
       const responseText = await response.text();
@@ -199,7 +199,15 @@ const Admin = () => {
       }
 
       const data = JSON.parse(responseText);
-      setProducts([...products, data]);
+      const newProductWithImage = {
+        ...data,
+        image: data.image ? (
+          data.image.startsWith('http') ? 
+            data.image : 
+            `${API_BASE_URL}/api/uploads/${data.image}`
+        ) : null
+      };
+      setProducts([...products, newProductWithImage]);
       setShowAddProductForm(false);
       setNewProduct({ name: '', category: '', image: null, imagePreview: null });
       Swal.fire('Success!', 'Product added successfully', 'success');
@@ -214,7 +222,7 @@ const Admin = () => {
     formData.append('image', file);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/products/upload`, {
+      const response = await fetch(`${API_BASE_URL}/api/upload`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${getAuthToken()}`
@@ -363,12 +371,15 @@ const Admin = () => {
                 const file = e.target.files[0];
                 if (file) {
                   if (file.type.startsWith('image/')) {
-                    const imageUrl = await handleImageUpload(file);
-                    setNewProduct({
-                      ...newProduct,
-                      image: file,
-                      imagePreview: imageUrl
-                    });
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      setNewProduct({
+                        ...newProduct,
+                        image: file,
+                        imagePreview: reader.result
+                      });
+                    };
+                    reader.readAsDataURL(file);
                   } else {
                     Swal.fire('Error!', 'Please upload an image file', 'error');
                     e.target.value = '';
