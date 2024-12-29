@@ -6,7 +6,7 @@ import ScrollToTop from '../components/ScrollToTop';
 
 function Products() {
   const [products, setProducts] = useState([]);
-  const [visibleProducts, setVisibleProducts] = useState(3);
+  const [visibleProducts, setVisibleProducts] = useState(6);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [error, setError] = useState('');
 
@@ -17,16 +17,14 @@ function Products() {
   }, []);
 
   useEffect(() => {
-    if (windowWidth <= 1068) {
+    if (windowWidth <= 768) {
       setVisibleProducts(3);
-    } else if (windowWidth <= 1920) {
-      setVisibleProducts(3);
-    } else if (windowWidth <= 480) {
-      setVisibleProducts(3);
+    } else if (windowWidth <= 1024) {
+      setVisibleProducts(4);
     } else {
-      setVisibleProducts(products.length);
+      setVisibleProducts(6);
     }
-  }, [windowWidth, products.length]);
+  }, [windowWidth]);
 
   const showMoreProducts = () => {
     setVisibleProducts(prev => prev + 3);
@@ -34,7 +32,13 @@ function Products() {
 
   useEffect(() => {
     // Fetch products from the backend
-    fetch(`${API_BASE_URL}/products`)
+    fetch(`${API_BASE_URL}/api/products`, {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    })
       .then(response => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
@@ -42,13 +46,16 @@ function Products() {
         return response.json();
       })
       .then(data => {
-        const productsArray = data.filter(product => product.category === 'Phones').map(product => ({
+        const productsArray = data.map(product => ({
           ...product,
-          image: `${UPLOADS_URL}/${product.image}`
+          image: product.image.startsWith('http') ? product.image : `${UPLOADS_URL}/${product.image}`
         }));
         setProducts(productsArray);
       })
-      .catch(error => console.error('Error:', error));
+      .catch(error => {
+        console.error('Error:', error);
+        setError('Failed to load products');
+      });
   }, []);
 
   return (
@@ -58,9 +65,8 @@ function Products() {
           <h1 className="title">Find Your <br />Missing Belongings</h1>
           <p className="description">
             Lost something on campus? <br />Discover our reliable platform to help you<br /> 
-            track and reconnect with your items.<br />Find it, claim it, and move on.
+            locate your lost items with ease.
           </p>
-          <a href="./booking"><button id='cta-button' className="cta-button">Start Searching</button></a>
         </div>
       </div>
 
@@ -72,26 +78,26 @@ function Products() {
       </div>
       <div className="product-grid">
         {error && <p className="error">{error}</p>}
-        {products.slice(0, visibleProducts).map((product) => (
-          <div key={product._id} className="product-card">
+        {products.slice(0, visibleProducts).map((product, index) => (
+          <div key={product._id || index} className="product-card">
             <div className="product-image">
               <img
-                src={product.image}
-                alt={product.name}
-                onError={(e) => { e.target.src = '/path/to/default-image.jpg'; }} // Replace with actual default image path
+                src={product.image || '/default-image.jpg'} 
+                alt={product.name} 
+                onError={(e) => { e.target.src = '/default-image.jpg'; }} 
               />
             </div>
             <div className="product-info">
               <h3>{product.name}</h3>
               <p>Category: {product.category}</p>
-              <p>Details: {product.price}</p> {/* Update this line to reflect item-specific details */}
+              <p>Details: {product.price}</p> 
             </div>
           </div>
         ))}
       </div>
       {visibleProducts < products.length && (
-        <button className="show-more-button" onClick={showMoreProducts}>
-          View More Items
+        <button onClick={showMoreProducts} className="load-more">
+          Load More
         </button>
       )}
       <ScrollToTop />
