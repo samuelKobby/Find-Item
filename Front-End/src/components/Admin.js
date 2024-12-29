@@ -25,7 +25,7 @@ const Admin = () => {
 
   const token = localStorage.getItem('token');
 
-  const categories = ['ID Card', 'Accessory', 'Others'];
+  const categories = ['ID Card', 'Accessory', 'Others']
 
   useEffect(() => {
     const headers = {
@@ -71,22 +71,25 @@ const Admin = () => {
   };
 
   const handleEditProduct = (product) => {
-    setEditingProduct(product);
+    setEditingProduct({
+      ...product,
+      imagePreview: product.image // The image is already a base64 string
+    });
   };
 
   const handleSaveProduct = async () => {
     try {
       const formData = new FormData();
-
-      // Append all fields from editingProduct to FormData
-      for (const key in editingProduct) {
-        if (Object.prototype.hasOwnProperty.call(editingProduct, key)) {
-          formData.append(key, editingProduct[key]);
-        }
+      formData.append('name', editingProduct.name);
+      formData.append('category', editingProduct.category);
+      
+      // Only append image if a new one was selected
+      if (editingProduct.image instanceof File) {
+        formData.append('image', editingProduct.image);
       }
 
-      // Send the update request
-      const response = await fetch(`https://find-item.vercel.app/api/products/update/${editingProduct._id}`, {
+      // Update the API endpoint (remove /update from the URL)
+      const response = await fetch(`https://find-item.vercel.app/api/products/${editingProduct._id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -94,20 +97,22 @@ const Admin = () => {
         body: formData,
       });
 
-      if (response.ok) {
-        const updatedProduct = await response.json();
-        setProducts((prevProducts) =>
-          prevProducts.map((product) => (product._id === editingProduct._id ? updatedProduct : product))
-        );
-        setEditingProduct(null);
-        Swal.fire('Updated!', 'The product has been updated.', 'success');
-      } else {
+      if (!response.ok) {
         const errorData = await response.json();
-        Swal.fire('Error!', errorData.message || 'Failed to update the product.', 'error');
+        throw new Error(errorData.error || 'Failed to update product');
       }
+
+      const updatedProduct = await response.json();
+      setProducts(prevProducts =>
+        prevProducts.map(product =>
+          product._id === editingProduct._id ? updatedProduct : product
+        )
+      );
+      setEditingProduct(null);
+      Swal.fire('Success!', 'Product updated successfully', 'success');
     } catch (error) {
       console.error('Error updating product:', error);
-      Swal.fire('Error!', 'An unexpected error occurred.', 'error');
+      Swal.fire('Error!', error.message || 'Failed to update product', 'error');
     }
   };
 
@@ -227,26 +232,27 @@ const Admin = () => {
       cancelButtonColor: '#d33',
       confirmButtonText: 'Yes, delete it!'
     });
-
+  
     if (result.isConfirmed) {
       try {
+        // Update the API endpoint (remove /delete from the URL)
         const response = await fetch(`https://find-item.vercel.app/api/products/${productId}`, {
           method: 'DELETE',
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
+            'Authorization': `Bearer ${token}`
           }
         });
-
+  
         if (!response.ok) {
-          throw new Error('Failed to delete product');
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to delete product');
         }
-
+  
         setProducts(products.filter(product => product._id !== productId));
         Swal.fire('Deleted!', 'Product has been deleted.', 'success');
       } catch (error) {
         console.error('Error deleting product:', error);
-        Swal.fire('Error!', 'Failed to delete product', 'error');
+        Swal.fire('Error!', error.message || 'Failed to delete product', 'error');
       }
     }
   };
