@@ -77,7 +77,7 @@ const Admin = () => {
           product.image.startsWith('http') ? 
             product.image : 
             `${API_BASE_URL}/api/uploads/${product.image}?t=${Date.now()}`
-        ) : defaultproductImage
+        ) : null
       }));
 
       console.log('Products with images:', productsWithImages);
@@ -169,7 +169,7 @@ const Admin = () => {
           updatedProduct.image.startsWith('http') ? 
             updatedProduct.image : 
             `${API_BASE_URL}/api/uploads/${updatedProduct.image}?t=${Date.now()}`
-        ) : defaultproductImage
+        ) : null
       };
 
       setProducts(prevProducts =>
@@ -230,7 +230,7 @@ const Admin = () => {
           data.image.startsWith('http') ? 
             data.image : 
             `${API_BASE_URL}/api/uploads/${data.image}?t=${Date.now()}`
-        ) : defaultproductImage
+        ) : null
       };
 
       console.log('New product with image:', newProductWithImage);
@@ -700,7 +700,7 @@ const Admin = () => {
                           className="custom-select"
                         >
                           <option value="Pending">Pending</option>
-                          <option value="Accepted">Accept</option>
+                          <option value="Accepted">Claimed</option>
                           <option value="Denied">Deny</option>
 
                         </select>
