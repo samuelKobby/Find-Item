@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Admin.css';
 import '../Styles/typography.css';
-import defaultproductImage from '../Images/bo4.png';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faTrash, faSignOutAlt, faArrowUp } from '@fortawesome/free-solid-svg-icons';
 import { FaPlus } from 'react-icons/fa';
@@ -495,11 +494,11 @@ const Admin = () => {
           </div>
           <div className="image-preview">
             <img 
-              src={editingProduct.imagePreview || editingProduct.image || defaultproductImage}
+              src={editingProduct.imagePreview || editingProduct.image}
               alt="Preview"
               onError={(e) => {
                 e.target.onerror = null;
-                e.target.src = defaultproductImage;
+                e.target.src = '';
               }}
             />
           </div>
@@ -549,7 +548,7 @@ const Admin = () => {
                 onError={(e) => {
                   console.log('Image load error for:', product.name, product.image);
                   e.target.onerror = null;
-                  e.target.src = defaultproductImage;
+                  e.target.src = '';
                 }}
               />
             </div>
