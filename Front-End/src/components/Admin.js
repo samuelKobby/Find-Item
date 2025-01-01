@@ -598,41 +598,61 @@ const Admin = () => {
   );
 
   const renderProducts = () => (
-    <div className="product-list">
-      {filteredProducts.map(product => (
-        <div key={product._id} className="product-card">
-          <div className="product-image">
-            <img
-              src={product.image || 'https://via.placeholder.com/150?text=No+Image'}
-              alt={product.name}
-              onError={(e) => {
-                console.error('Image load error for:', product.name);
-                e.target.src = 'https://via.placeholder.com/150?text=No+Image';
-              }}
-              style={{ maxWidth: '100%', height: 'auto', objectFit: 'cover' }}
-            />
-          </div>
-          <div className="product-details">
-            <h3>{product.name}</h3>
-            <p>Category: {product.category}</p>
-            <p>Details: {product.price}</p>
-            <div className="product-actions">
-              <button
-                className="edit-button"
-                onClick={() => handleEditProduct(product)}
-              >
-                <FontAwesomeIcon icon={faEdit} /> Edit
-              </button>
-              <button
-                className="delete-button"
-                onClick={() => handleDeleteProduct(product._id)}
-              >
-                <FontAwesomeIcon icon={faTrash} /> Delete
-              </button>
+    <div className="admin-products">
+      <div className="admin-header">
+        <div className="search-filter">
+          <input
+            type="text"
+            placeholder="Search items..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+            className="search-input"
+          />
+          <select
+            value={filterCategory}
+            onChange={handleFilterChange}
+            className="filter-select"
+          >
+            <option value="">All Categories</option>
+            {categories.map((cat) => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
+        </div>
+        <button className="add-product-button" onClick={() => setShowAddProductForm(true)}>
+          <FaPlus /> Add Item
+        </button>
+      </div>
+
+      <div className="products-grid">
+        {filteredProducts.map((product) => (
+          <div key={product._id} className="product-card">
+            <div className="product-image">
+              <img
+                src={product.image || defaultproductImage}
+                alt={product.name}
+                onError={(e) => {
+                  console.log('Image load error for:', product.name, product.image);
+                  e.target.onerror = null;
+                  e.target.src = defaultproductImage;
+                }}
+              />
+            </div>
+            <div className="product-details">
+              <h3>{product.name}</h3>
+              <p>Category: {product.category}</p>
+              <div className="product-actions">
+                <button onClick={() => handleEditProduct(product)} className="edit-button">
+                  <FontAwesomeIcon icon={faEdit} /> Edit
+                </button>
+                <button onClick={() => handleDeleteProduct(product._id)} className="delete-button">
+                  <FontAwesomeIcon icon={faTrash} /> Delete
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 
