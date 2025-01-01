@@ -48,11 +48,7 @@ function Products() {
       .then(data => {
         const productsArray = data.map(product => ({
           ...product,
-          image: product.image ? (
-            product.image.startsWith('http') ? 
-              product.image : 
-              `${API_BASE_URL}/api/uploads/${product.image}`
-          ) : null
+          image: product.image ? `${API_BASE_URL}/api/uploads/${product.image}` : null
         }));
         setProducts(productsArray);
       })
@@ -86,9 +82,12 @@ function Products() {
           <div key={product._id || index} className="product-card">
             <div className="product-image">
               <img
-                src={product.image || '/default-image.jpg'} 
-                alt={product.name} 
-                onError={(e) => { e.target.src = '/default-image.jpg'; }} 
+                src={product.image}
+                alt={product.name}
+                onError={(e) => {
+                  console.log('Image load error for:', product.name);
+                  e.target.style.display = 'none';
+                }}
               />
             </div>
             <div className="product-info">

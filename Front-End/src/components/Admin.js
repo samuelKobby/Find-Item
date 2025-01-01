@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Admin.css';
 import '../Styles/typography.css';
+import defaultproductImage from '../Images/bo4.png';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faTrash, faSignOutAlt, faArrowUp } from '@fortawesome/free-solid-svg-icons';
 import { FaPlus } from 'react-icons/fa';
@@ -543,12 +544,12 @@ const Admin = () => {
           <div key={product._id} className="product-card">
             <div className="product-image">
               <img
-                src={product.image}
+                src={product.image || defaultproductImage}
                 alt={product.name}
                 onError={(e) => {
                   console.log('Image load error for:', product.name, product.image);
                   e.target.onerror = null;
-                  e.target.src = '';
+                  e.target.src = defaultproductImage;
                 }}
               />
             </div>
@@ -578,7 +579,7 @@ const Admin = () => {
         </div>
         <div className="admin-sidebar-item" onClick={() => setSelectedSection('dashboard')}>Dashboard</div>
         <div className="admin-sidebar-item" onClick={() => setSelectedSection('bookings')}>Bookings</div>
-        <div className="admin-sidebar-item" onClick={() => setSelectedSection('previewProducts')}>Preview Products</div>
+        <div className="admin-sidebar-item" onClick={() => setSelectedSection('previewProducts')}>Preview items</div>
         <FontAwesomeIcon
           icon={faSignOutAlt}
           className="logout-icon"
