@@ -31,6 +31,7 @@ function Cocktails() {
   };
 
   useEffect(() => {
+    // Fetch products from the backend
     fetch(`${API_BASE_URL}/api/products`, {
       headers: {
         'Accept': 'application/json',
@@ -45,9 +46,7 @@ function Cocktails() {
         return response.json();
       })
       .then(data => {
-        const productsArray = data
-          .filter(product => product.category === 'ID Card')
-          .map(product => product);
+        const productsArray = data.filter(product => product.category === 'ID Card');
         setProducts(productsArray);
       })
       .catch(error => {
@@ -60,18 +59,18 @@ function Cocktails() {
     <div className="product-main">
       <div className="homepage" id='products'>
         <div className="content">
-          <h1 className="title">Find Your <br />Missing Belongings</h1>
+          <h1 className="title">Lost ID Cards</h1>
           <p className="description">
-            Lost something on campus? <br />Discover our reliable platform to help you<br /> 
-            locate your lost items with ease.
+            Lost your ID card on campus? <br />Check here to see if someone has found it.
           </p>
         </div>
       </div>
 
       <div className="product-head">
-        <h1>Found ID Cards</h1>
+        <h1>Recently Found ID Cards</h1>
         <p>
-          Lost your ID or student card? <br />Check our collection of found cards. <br />Your card might be here waiting for you.
+          Browse through ID cards that have been found. <br />
+          Your lost ID card might be here.
         </p>
       </div>
       <div className="product-grid">
@@ -92,14 +91,14 @@ function Cocktails() {
             <div className="product-info">
               <h3>{product.name}</h3>
               <p>Category: {product.category}</p>
-              <p>Details: {product.price}</p> 
+              <p>Details: {product.price}</p>
             </div>
           </div>
         ))}
       </div>
       {visibleProducts < products.length && (
         <button onClick={showMoreProducts} className="load-more">
-          View More Items
+          Load More
         </button>
       )}
       <ScrollToTop />

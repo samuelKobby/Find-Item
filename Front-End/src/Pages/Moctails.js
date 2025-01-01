@@ -4,7 +4,7 @@ import '../Styles/Products.css';
 import '../Styles/ScrollToTop.css';
 import ScrollToTop from '../components/ScrollToTop';
 
-function Mocktails() {
+function Moctails() {
   const [products, setProducts] = useState([]);
   const [visibleProducts, setVisibleProducts] = useState(6);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -31,6 +31,7 @@ function Mocktails() {
   };
 
   useEffect(() => {
+    // Fetch products from the backend
     fetch(`${API_BASE_URL}/api/products`, {
       headers: {
         'Accept': 'application/json',
@@ -45,9 +46,7 @@ function Mocktails() {
         return response.json();
       })
       .then(data => {
-        const productsArray = data
-          .filter(product => product.category === 'Gadgets')
-          .map(product => product);
+        const productsArray = data.filter(product => product.category === 'Gadgets');
         setProducts(productsArray);
       })
       .catch(error => {
@@ -60,18 +59,18 @@ function Mocktails() {
     <div className="product-main">
       <div className="homepage" id='products'>
         <div className="content">
-          <h1 className="title">Find Your <br />Missing Belongings</h1>
+          <h1 className="title">Lost Gadgets</h1>
           <p className="description">
-            Lost something on campus? <br />Discover our reliable platform to help you<br /> 
-            locate your lost items with ease.
+            Lost your gadget on campus? <br />Check here to see if someone has found it.
           </p>
         </div>
       </div>
 
       <div className="product-head">
-        <h1>Found Accessories</h1>
+        <h1>Recently Found Gadgets</h1>
         <p>
-          From bags to watches, <br />browse through accessories that have been found. <br />Your lost item might be waiting for you.
+          Browse through gadgets that have been found. <br />
+          Your lost device might be here.
         </p>
       </div>
       <div className="product-grid">
@@ -92,14 +91,14 @@ function Mocktails() {
             <div className="product-info">
               <h3>{product.name}</h3>
               <p>Category: {product.category}</p>
-              <p>Details: {product.price}</p> 
+              <p>Details: {product.price}</p>
             </div>
           </div>
         ))}
       </div>
       {visibleProducts < products.length && (
         <button onClick={showMoreProducts} className="load-more">
-          View More Items
+          Load More
         </button>
       )}
       <ScrollToTop />
@@ -107,4 +106,4 @@ function Mocktails() {
   );
 }
 
-export default Mocktails;
+export default Moctails;

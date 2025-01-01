@@ -31,6 +31,7 @@ function Boba() {
   };
 
   useEffect(() => {
+    // Fetch products from the backend
     fetch(`${API_BASE_URL}/api/products`, {
       headers: {
         'Accept': 'application/json',
@@ -45,16 +46,7 @@ function Boba() {
         return response.json();
       })
       .then(data => {
-        const productsArray = data
-          .filter(product => product.category === 'Others')
-          .map(product => ({
-            ...product,
-            image: product.image ? (
-              product.image.startsWith('http') ? 
-                product.image : 
-                `${API_BASE_URL}/api/uploads/${product.image}`
-            ) : null
-          }));
+        const productsArray = data.filter(product => product.category === 'Others');
         setProducts(productsArray);
       })
       .catch(error => {
@@ -67,18 +59,18 @@ function Boba() {
     <div className="product-main">
       <div className="homepage" id='products'>
         <div className="content">
-          <h1 className="title">Find Your <br />Missing Belongings</h1>
+          <h1 className="title">Other Lost Items</h1>
           <p className="description">
-            Lost something on campus? <br />Discover our reliable platform to help you<br /> 
-            locate your lost items with ease.
+            Lost something else on campus? <br />Check here to see if someone has found it.
           </p>
         </div>
       </div>
 
       <div className="product-head">
-        <h1>Other Lost Items</h1>
+        <h1>Recently Found Items</h1>
         <p>
-          Looking for something else? <br />Browse through our collection of miscellaneous items. <br />Your lost item might be among them.
+          Browse through other items that have been found. <br />
+          Your lost item might be here.
         </p>
       </div>
       <div className="product-grid">
@@ -87,22 +79,26 @@ function Boba() {
           <div key={product._id || index} className="product-card">
             <div className="product-image">
               <img
-                src={product.image || '/default-image.jpg'} 
-                alt={product.name} 
-                onError={(e) => { e.target.src = '/default-image.jpg'; }} 
+                src={product.image || 'https://via.placeholder.com/150?text=No+Image'}
+                alt={product.name}
+                onError={(e) => {
+                  console.error('Image load error for:', product.name);
+                  e.target.src = 'https://via.placeholder.com/150?text=No+Image';
+                }}
+                style={{ maxWidth: '100%', height: 'auto' }}
               />
             </div>
             <div className="product-info">
               <h3>{product.name}</h3>
               <p>Category: {product.category}</p>
-              <p>Details: {product.price}</p> 
+              <p>Details: {product.price}</p>
             </div>
           </div>
         ))}
       </div>
       {visibleProducts < products.length && (
         <button onClick={showMoreProducts} className="load-more">
-          View More Items
+          Load More
         </button>
       )}
       <ScrollToTop />
