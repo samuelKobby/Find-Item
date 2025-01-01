@@ -23,10 +23,11 @@ const Admin = () => {
   const [newProduct, setNewProduct] = useState({
     name: '',
     category: '',
-    image: null,
-    imagePreview: null
+    image: '',
+    imagePreview: ''
   });
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [error, setError] = useState('');
 
   const categories = ['ID Card', 'Accessory', 'Others']
 
@@ -186,93 +187,110 @@ const Admin = () => {
     }
   };
 
-  const handleAddProduct = async () => {
+  const handleAddProduct = async (e) => {
+    e.preventDefault();
+    
     if (!newProduct.name || !newProduct.category || !newProduct.image) {
-      Swal.fire('Error!', 'Please fill in all fields', 'error');
+      setError('All fields are required');
       return;
     }
 
-    const formData = new FormData();
-    formData.append('name', newProduct.name);
-    formData.append('category', newProduct.category);
-    formData.append('image', newProduct.image);
-
     try {
-      console.log('Sending data:', {
-        name: newProduct.name,
-        category: newProduct.category,
-        image: newProduct.image.name
-      });
-
       const response = await fetch(`${API_BASE_URL}/api/products/add`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${getAuthToken()}`
+          'Content-Type': 'application/json'
         },
-        body: formData,
+        body: JSON.stringify({
+          name: newProduct.name,
+          category: newProduct.category,
+          image: newProduct.image
+        }),
         credentials: 'include'
       });
 
-      const responseText = await response.text();
-      console.log('Server response text:', responseText);
-
       if (!response.ok) {
-        throw new Error(responseText || 'Failed to add product');
-      }
-
-      const data = JSON.parse(responseText);
-      console.log('Parsed response data:', data);
-
-      // Create a new product object with the correct image URL
-      const newProductWithImage = {
-        ...data,
-        image: data.image ? (
-          data.image.startsWith('http') ? 
-            data.image : 
-            `${API_BASE_URL}/api/uploads/${data.image}?t=${Date.now()}`
-        ) : null
-      };
-
-      console.log('New product with image:', newProductWithImage);
-
-      setProducts(prevProducts => [...prevProducts, newProductWithImage]);
-      setShowAddProductForm(false);
-      setNewProduct({ name: '', category: '', image: null, imagePreview: null });
-      Swal.fire('Success!', 'Product added successfully', 'success');
-    } catch (error) {
-      console.error('Error adding product:', error);
-      Swal.fire('Error!', error.message || 'Failed to add product', 'error');
-    }
-  };
-
-  const handleImageUpload = async (file) => {
-    const formData = new FormData();
-    formData.append('image', file);
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/upload`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${getAuthToken()}`
-        },
-        credentials: 'include',
-        body: formData
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to upload image');
+        throw new Error('Failed to add product');
       }
 
       const data = await response.json();
-      return data.imageUrl;
+      setProducts(prevProducts => [...prevProducts, data]);
+      setNewProduct({
+        name: '',
+        category: '',
+        image: '',
+        imagePreview: ''
+      });
+      setError('');
     } catch (error) {
-      console.error('Error uploading image:', error);
-      throw error;
+      console.error('Error adding product:', error);
+      setError('Failed to add product');
     }
   };
 
-  const handleUpdateImageClick = async () => {
-    fileInputRef.current.click();
+  const handleUpdateProduct = async (e) => {
+    e.preventDefault();
+    
+    if (!editingProduct.name || !editingProduct.category) {
+      setError('Name and category are required');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/products/${editingProduct._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: editingProduct.name,
+          category: editingProduct.category,
+          image: editingProduct.image
+        }),
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update product');
+      }
+
+      const updatedProduct = await response.json();
+      
+      setProducts(prevProducts =>
+        prevProducts.map(product =>
+          product._id === updatedProduct._id ? updatedProduct : product
+        )
+      );
+      
+      setEditingProduct(null);
+      setError('');
+    } catch (error) {
+      console.error('Error updating product:', error);
+      setError('Failed to update product');
+    }
+  };
+
+  const handleImageChange = async (e, isEditing = false) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (isEditing) {
+          setEditingProduct(prev => ({
+            ...prev,
+            image: reader.result,
+            imagePreview: reader.result
+          }));
+        } else {
+          setNewProduct(prev => ({
+            ...prev,
+            image: reader.result,
+            imagePreview: reader.result
+          }));
+        }
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSearchChange = (e) => {
@@ -395,30 +413,20 @@ const Admin = () => {
               type="file"
               className="file-input"
               accept="image/*"
-              onChange={async (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                  if (file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                      setNewProduct({
-                        ...newProduct,
-                        image: file,
-                        imagePreview: reader.result
-                      });
-                    };
-                    reader.readAsDataURL(file);
-                  } else {
-                    Swal.fire('Error!', 'Please upload an image file', 'error');
-                    e.target.value = '';
-                  }
-                }
-              }}
+              onChange={(e) => handleImageChange(e)}
             />
           </div>
           {newProduct.imagePreview && (
             <div className="image-preview">
-              <img src={newProduct.imagePreview} alt="Preview" />
+              <img 
+                src={newProduct.imagePreview} 
+                alt="Preview" 
+                style={{ maxWidth: '200px', height: 'auto' }}
+                onError={(e) => {
+                  console.error('Preview image load error');
+                  e.target.src = 'https://via.placeholder.com/150?text=Preview';
+                }}
+              />
             </div>
           )}
         </div>
@@ -472,40 +480,23 @@ const Admin = () => {
               type="file"
               className="file-input"
               accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files[0];
-                if (file) {
-                  if (file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                      setEditingProduct({
-                        ...editingProduct,
-                        image: file,
-                        imagePreview: reader.result
-                      });
-                    };
-                    reader.readAsDataURL(file);
-                  } else {
-                    Swal.fire('Error!', 'Please upload an image file', 'error');
-                    e.target.value = '';
-                  }
-                }
-              }}
+              onChange={(e) => handleImageChange(e, true)}
             />
           </div>
           <div className="image-preview">
-            <img 
-              src={editingProduct.imagePreview || editingProduct.image}
+            <img
+              src={editingProduct.imagePreview || editingProduct.image || 'https://via.placeholder.com/150?text=No+Image'}
               alt="Preview"
+              style={{ maxWidth: '200px', height: 'auto' }}
               onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = '';
+                console.error('Preview image load error');
+                e.target.src = 'https://via.placeholder.com/150?text=Preview';
               }}
             />
           </div>
         </div>
 
-        <button className="submit-button" onClick={handleSaveProduct}>
+        <button className="submit-button" onClick={handleUpdateProduct}>
           Save Changes
         </button>
       </div>
@@ -544,13 +535,13 @@ const Admin = () => {
           <div key={product._id} className="product-card">
             <div className="product-image">
               <img
-                src={product.image || defaultproductImage}
+                src={product.image || 'https://via.placeholder.com/150?text=No+Image'}
                 alt={product.name}
                 onError={(e) => {
-                  console.log('Image load error for:', product.name, product.image);
-                  e.target.onerror = null;
-                  e.target.src = defaultproductImage;
+                  console.error('Image load error for:', product.name);
+                  e.target.src = 'https://via.placeholder.com/150?text=No+Image';
                 }}
+                style={{ maxWidth: '100%', height: 'auto', objectFit: 'cover' }}
               />
             </div>
             <div className="product-details">

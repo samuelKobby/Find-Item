@@ -46,11 +46,8 @@ function Mocktails() {
       })
       .then(data => {
         const productsArray = data
-          .filter(product => product.category === 'Accessory')
-          .map(product => ({
-            ...product,
-            image: product.image ? `${API_BASE_URL}/api/uploads/${product.image}` : null
-          }));
+          .filter(product => product.category === 'Gadgets')
+          .map(product => product);
         setProducts(productsArray);
       })
       .catch(error => {
@@ -83,12 +80,13 @@ function Mocktails() {
           <div key={product._id || index} className="product-card">
             <div className="product-image">
               <img
-                src={product.image}
+                src={product.image || 'https://via.placeholder.com/150?text=No+Image'}
                 alt={product.name}
                 onError={(e) => {
-                  console.log('Image load error for:', product.name);
-                  e.target.style.display = 'none';
+                  console.error('Image load error for:', product.name);
+                  e.target.src = 'https://via.placeholder.com/150?text=No+Image';
                 }}
+                style={{ maxWidth: '100%', height: 'auto' }}
               />
             </div>
             <div className="product-info">

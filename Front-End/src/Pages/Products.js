@@ -46,11 +46,8 @@ function Products() {
         return response.json();
       })
       .then(data => {
-        const productsArray = data.map(product => ({
-          ...product,
-          image: product.image ? `${API_BASE_URL}/api/uploads/${product.image}` : null
-        }));
-        setProducts(productsArray);
+        // No need to modify the image URL since we're getting base64 directly
+        setProducts(data);
       })
       .catch(error => {
         console.error('Error:', error);
@@ -82,12 +79,13 @@ function Products() {
           <div key={product._id || index} className="product-card">
             <div className="product-image">
               <img
-                src={product.image}
+                src={product.image || '/placeholder-image.png'}
                 alt={product.name}
                 onError={(e) => {
-                  console.log('Image load error for:', product.name);
-                  e.target.style.display = 'none';
+                  console.error('Image load error for:', product.name);
+                  e.target.src = 'https://via.placeholder.com/150?text=No+Image';
                 }}
+                style={{ maxWidth: '100%', height: 'auto' }}
               />
             </div>
             <div className="product-info">
