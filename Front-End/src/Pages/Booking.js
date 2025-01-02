@@ -66,12 +66,12 @@ const Booking = () => {
 
     return (
         <div className="main-book">
-            <div className="homepage" id="book">
-                <div className="content">
-                    <h1 className="title">Lost Something? <br />Report It Here.</h1>
-                    <p className="description">
-                        Provide details about your lost item, <br />and our team will help you reconnect<br />
-                        with your belongings. Submit your <br />report and we'll get back to you.
+            <div className="homepage1" id="book">
+                <div className="header-content">
+                    <h1 className="title-header">Lost Something? <br />Report It Here.</h1>
+                    <p className="subtext">
+                        Provide details about your lost item, and our team will help you reconnect<br />
+                        with your belongings. Submit your report and we'll get back to you.
                     </p>
                     <button className="cta-button" onClick={scrollToForm}>Report Now</button>
                 </div>

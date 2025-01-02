@@ -45,8 +45,8 @@ const Navbar = () => {
                   {dropdownOpen && (
                     <ul className="dropdown-menu">
                       <li><Link to="./cocktails" onClick={handleLinkClick}>ID Cards</Link></li>
-                      <li><Link to="./boba" onClick={handleLinkClick}>Accessories</Link></li>
-                      <li><Link to="./mocktails" onClick={handleLinkClick}>Others</Link></li>
+                      <li><Link to="./mocktails" onClick={handleLinkClick}>Accessories</Link></li>
+                      <li><Link to="./boba" onClick={handleLinkClick}>Others</Link></li>
                     </ul>
                   )}
                 </div>

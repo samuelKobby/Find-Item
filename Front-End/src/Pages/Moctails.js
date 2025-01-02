@@ -46,7 +46,7 @@ function Moctails() {
         return response.json();
       })
       .then(data => {
-        const productsArray = data.filter(product => product.category === 'Gadgets');
+        const productsArray = data.filter(product => product.category === 'Accessory');
         setProducts(productsArray);
       })
       .catch(error => {
@@ -57,7 +57,7 @@ function Moctails() {
 
   return (
     <div className="product-main">
-      <div className="homepage" id='products'>
+      <div className="homepage" id='mocktails'>
         <div className="content">
           <h1 className="title">Lost Gadgets</h1>
           <p className="description">
@@ -73,11 +73,11 @@ function Moctails() {
           Your lost device might be here.
         </p>
       </div>
-      <div className="product-grid">
+      <div className="product-grid1">
         {error && <p className="error">{error}</p>}
         {products.slice(0, visibleProducts).map((product, index) => (
-          <div key={product._id || index} className="product-card">
-            <div className="product-image">
+          <div key={product._id || index} className="product-card1">
+            <div className="product-image1">
               <img
                 src={product.image || 'https://via.placeholder.com/150?text=No+Image'}
                 alt={product.name}

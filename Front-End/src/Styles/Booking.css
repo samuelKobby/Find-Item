@@ -6,43 +6,55 @@
     
 }
 
+.homepage1 {
+    display: flex;
+    justify-content: left;
+    align-items: left;
+    min-height: 630px;
+    background-size: cover;
+    background-position: center;
+    padding: 25px;
+    position: relative;
+  }
 .header-content {
-    position: absolute;
-    top: 50%;
-    left: 35%;
-    transform: translate(-50%, -50%);
     text-align: left;
-    color: rgb(255, 255, 255);
+    z-index: 2;
     padding: 20px;
-    border-radius: 8px;
-}
+    max-width: 1200px;
+    margin: 0 auto;
+    margin-left: 100px;
+    margin-top: 100px;
 
-.title-header {
-    font-size: 6em;
-    font-weight: 800;
-    margin: 0;
-    color: blue;
-}
-
-.subtext {
-    font-size: 2.2em;
-    margin: 10px 0;
-    line-height: 35px;
-}
-
-.cta-button {
-    background-color: #d32f2f;
-    color: white;
-    border: none;
+  }
+  
+  .header-content .title-header {
+    color: #007bff;
+    font-size: 3rem;
+    margin-bottom: 30px;
+    line-height: 1.2;
+  }
+  
+  .header-content .subtext {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    margin-bottom: 50px;
+    color: #fff;
+  }
+  
+  .header-content .cta-button {
+    background-color: white;
+    color: #007bff;
     padding: 10px 20px;
-    border-radius: 4px;
+    border: none;
+    border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.cta-button:hover {
-    background-color: #b71c1c;
-}
+    font-size: 1.2vw;
+  }
+  
+  .header-content.cta-button:hover {
+    background-color: #0056b3;
+    color: #fff;
+  }
 
 .booking-container {
     

@@ -48,9 +48,7 @@ body {
   }
 }
 
-#boba{
-  background-image: url('/src/Images/Accessories.jpg');
-}
+
 
 .product-head h1{
   margin-top: 20px;
@@ -58,11 +56,16 @@ body {
   font-weight: 600;
 }
 
-#mocktail{
+#boba{
   background-image: url('/src/Images/others.jpg');
+  
 }
 
-#cocktail{
+#mocktails{
+  background-image: url('/src/Images/Accessories.jpg');
+}
+
+#cocktails{
   background-image: url('/src/Images/Picture7.jpg');
 }
 
@@ -83,11 +86,11 @@ body {
 }
 
 #events{
-  background-image: url('/src/Images/3.png');
+  background-image: url('/src/Images/Picture7.jpg');
 }
 
 .content {
-  text-align: center;
+  text-align: left;
   color: white;
   z-index: 2;
   padding: 20px;
