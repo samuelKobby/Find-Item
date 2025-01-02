@@ -600,14 +600,7 @@ const Admin = () => {
   const renderProducts = () => (
     <div className="admin-products">
       <div className="admin-header">
-        <div className="search-filter">
-          <input
-            type="text"
-            placeholder="Search items..."
-            value={searchTerm}
-            onChange={handleSearchChange}
-            className="search-input"
-          />
+        <div className="filter-and-search">
           <select
             value={filterCategory}
             onChange={handleFilterChange}
@@ -618,6 +611,14 @@ const Admin = () => {
               <option key={cat} value={cat}>{cat}</option>
             ))}
           </select>
+          <input
+            type="text"
+            placeholder="Search items..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+            className="search-input"
+          />
+         
         </div>
         <button className="add-product-button" onClick={() => setShowAddProductForm(true)}>
           <FaPlus /> Add Item
@@ -628,14 +629,14 @@ const Admin = () => {
         {filteredProducts.map((product) => (
           <div key={product._id} className="product-card">
             <div className="product-image">
-              <img
-                src={product.image || defaultproductImage}
+            <img
+                src={product.image || '/placeholder-image.png'}
                 alt={product.name}
                 onError={(e) => {
-                  console.log('Image load error for:', product.name, product.image);
-                  e.target.onerror = null;
-                  e.target.src = defaultproductImage;
+                  console.error('Image load error for:', product.name);
+                  e.target.src = 'https://via.placeholder.com/150?text=No+Image';
                 }}
+                
               />
             </div>
             <div className="product-details">
