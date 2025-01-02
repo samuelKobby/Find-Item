@@ -73,11 +73,11 @@ function Products() {
           From ID cards to personal belongings, <br />browse through items others have reported. <br />Your lost treasure might just be here.
         </p>
       </div>
-      <div className="product-grid">
+      <div className="product-grid1">
         {error && <p className="error">{error}</p>}
         {products.slice(0, visibleProducts).map((product, index) => (
-          <div key={product._id || index} className="product-card">
-            <div className="product-image">
+          <div key={product._id || index} className="product-card1">
+            <div className="product-image1">
               <img
                 src={product.image || '/placeholder-image.png'}
                 alt={product.name}

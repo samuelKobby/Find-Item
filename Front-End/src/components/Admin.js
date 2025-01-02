@@ -75,9 +75,11 @@ const Admin = () => {
       const productsWithImages = productsData.map(product => ({
         ...product,
         image: product.image ? (
-          product.image.startsWith('http') ? 
+          product.image.startsWith('data:image') ? 
             product.image : 
-            `${API_BASE_URL}/api/uploads/${product.image}?t=${Date.now()}`
+            product.image.startsWith('http') ? 
+              product.image : 
+              `${API_BASE_URL}/api/uploads/${product.image}?t=${Date.now()}`
         ) : null
       }));
 
@@ -166,11 +168,13 @@ const Admin = () => {
       // Update the product in the state with the correct image URL
       const productWithImage = {
         ...updatedProduct,
-        image: updatedProduct.image ? (
-          updatedProduct.image.startsWith('http') ? 
+        image: editingProduct.imagePreview || (updatedProduct.image ? (
+          updatedProduct.image.startsWith('data:image') ? 
             updatedProduct.image : 
-            `${API_BASE_URL}/api/uploads/${updatedProduct.image}?t=${Date.now()}`
-        ) : null
+            updatedProduct.image.startsWith('http') ? 
+              updatedProduct.image : 
+              `${API_BASE_URL}/api/uploads/${updatedProduct.image}?t=${Date.now()}`
+        ) : null)
       };
 
       setProducts(prevProducts =>
@@ -590,7 +594,7 @@ const Admin = () => {
           </div>
         </div>
 
-        <button className="submit-button" onClick={handleUpdateProduct}>
+        <button className="submit-button" onClick={handleSaveProduct}>
           Save Changes
         </button>
       </div>
@@ -628,28 +632,29 @@ const Admin = () => {
       <div className="products-grid">
         {filteredProducts.map((product) => (
           <div key={product._id} className="product-card">
-            <div className="product-image">
-            <img
-                src={product.image || '/placeholder-image.png'}
-                alt={product.name}
-                onError={(e) => {
-                  console.error('Image load error for:', product.name);
-                  e.target.src = 'https://via.placeholder.com/150?text=No+Image';
-                }}
+              <div className="product-image">
+                <img
+                  src={product.image || '/placeholder-image.png'}
+                  alt={product.name}
+                  onError={(e) => {
+                    console.error('Image load error for:', product.name);
+                    e.target.src = 'https://via.placeholder.com/150?text=No+Image';
+                  }}
                 
-              />
-            </div>
-            <div className="product-details">
-              <h3>{product.name}</h3>
-              <p>Category: {product.category}</p>
-              <div className="product-actions">
-                <button onClick={() => handleEditProduct(product)} className="edit-button">
-                  <FontAwesomeIcon icon={faEdit} /> Edit
-                </button>
-                <button onClick={() => handleDeleteProduct(product._id)} className="delete-button">
-                  <FontAwesomeIcon icon={faTrash} /> Delete
-                </button>
+                />
               </div>
+              <div className="product-details">
+                <h3>{product.name}</h3>
+                <p>Category: {product.category}</p>
+              </div>
+            <div className="product-actions">
+              <button onClick={() => handleEditProduct(product)} className="edit-button">
+                <FontAwesomeIcon icon={faEdit} /> Edit
+              </button>
+              <button onClick={() => handleDeleteProduct(product._id)} className="delete-button">
+                <FontAwesomeIcon icon={faTrash} /> Delete
+              </button>
+              
             </div>
           </div>
         ))}
