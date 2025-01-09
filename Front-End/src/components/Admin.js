@@ -665,9 +665,9 @@ const Admin = () => {
   return (
     <div id="admin-main-container">
       <div id="admin-sidebar">
-        <div id="logo" >
-          <img src={defaultproductImage} alt="Logo" className="logo" />
-        </div>
+        {/* <div id="logo" >
+          <img src={/Images/Logo.png} alt="Logo" className="logo" />
+        </div> */}
         <div className="admin-sidebar-item" onClick={() => setSelectedSection('dashboard')}>Dashboard</div>
         <div className="admin-sidebar-item" onClick={() => setSelectedSection('bookings')}>Bookings</div>
         <div className="admin-sidebar-item" onClick={() => setSelectedSection('previewProducts')}>Preview items</div>

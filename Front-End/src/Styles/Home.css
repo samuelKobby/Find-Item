@@ -13,6 +13,7 @@ body {
   background-position: center;
   padding: 25px;
   position: relative;
+  background-color: var(--bg-color);
 }
 
 #homepage {
@@ -50,11 +51,13 @@ body {
 
 
 
+
 .product-head h1{
   margin-top: 20px;
-  color: #3083ff;
+  color: var(--heading-color);
   font-weight: 600;
 }
+
 
 #boba{
   background-image: url('/src/Images/others.jpg');
@@ -63,7 +66,13 @@ body {
 
 #mocktails{
   background-image: url('/src/Images/Accessories.jpg');
+  
 }
+
+#mocktails{
+  background-image: url('/src/Images/Accessories.jpg');
+}
+
 
 #cocktails{
   background-image: url('/src/Images/Picture7.jpg');
@@ -87,11 +96,12 @@ body {
 
 #events{
   background-image: url('/src/Images/Picture7.jpg');
+  background-image: url('/src/Images/Picture7.jpg');
 }
 
 .content {
   text-align: left;
-  color: white;
+  color: var(--text-color);
   z-index: 2;
   padding: 20px;
   max-width: 1200px;
@@ -102,12 +112,14 @@ body {
   font-size: 3rem;
   margin-bottom: 20px;
   line-height: 1.2;
+  color: white;
 }
 
 .content .description {
   font-size: 1.2rem;
   line-height: 1.6;
   margin-bottom: 30px;
+  color: white;
 }
 
 .content .cta-button {
@@ -121,8 +133,8 @@ body {
 }
 
 .content .cta-button:hover {
-  background-color: #0056b3;
-  color: #fff;
+  background-color: var(--shadow-color);
+  color: var(--text-color);
 }
 
 .section2 {
@@ -130,6 +142,7 @@ body {
   justify-content: center;
   align-items: center;
   padding: 40px;
+  background-color: var(--bg-color);
 }
 
 .image-container img {
@@ -145,25 +158,25 @@ body {
 
 .text-container h3 {
   font-size: 24px;
-  color: #555;
+  color: var(--heading-color);
 }
 
 .text-container h2 {
   font-size: 36px;
   font-weight: bold;
-  color: #000;
+  color: var(--heading-color);
   margin: 20px 0;
 }
 
 .text-container p {
   font-size: 18px;
-  color: #666;
+  color: var(--paragraph-color);
   margin-bottom: 20px;
 }
 
 .text-container .cta-button {
-  background-color: #007bff;
-  color: white;
+  background-color: var(--card-bg);
+  color: var(--text-color);
   padding: 10px 20px;
   border: none;
   border-radius: 5px;
@@ -173,46 +186,46 @@ body {
 
 a{
   font-size: 16px;
-  color: #fff;
+  color: var(--text-color);
   text-decoration: none;
   transition: all 0.3s ease;
 }
 a:hover{
-  color: #fff;
+  color: var(--text-color);
 }
 
 #cta-button a{
-  color: #3083ff;
+  color: var(--heading-color);
   font-size: 20px;
   font-weight: 500;
   margin-bottom: 20px;
 }
 #cta-button a:hover{
-  color: #fff;
+  color: var(--text-color);
   font-size: 18px;
   margin-bottom: 20px;
 }
 
 .text-container .cta-button:hover {
-  background-color: #0056b3;
+  background-color: var(--shadow-color);
 }
 
 .section3 {
   padding: 20px;
   text-align: center;
-  background-color: #072c63;
+  background-color: var(--bg-color);
 }
 
 .section3 .header h2 {
   font-size: 36px;
   font-weight: bold;
-  color: #fff;
+  color: var(--heading-color);
   margin-bottom: 20px;
 }
 
 .section3 .header p {
   font-size: 1.3rem;
-  color: #fff;
+  color: var(--paragraph-color);
 }
 
 .section3 .grid {
@@ -230,6 +243,7 @@ a:hover{
   text-align: center;
   flex: 1 1 calc(33.333% - 40px);
   max-width: calc(33.333% - 40px);
+  background-color: var(--bg-color);
 }
 
 .section3 .grid-item .circle {
@@ -237,13 +251,13 @@ a:hover{
   height: 300px; 
   margin: 0 auto 10px;
   border-radius: 10%;
-  border: #fff 5px solid;
+  border: var(--text-color) 5px solid;
   overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #ffffff;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  background-color: var(--bg-color);
+  box-shadow: 0 4px 8px var(--shadow-color);
 }
 
 .section3 .grid-item .circle img {
@@ -254,7 +268,7 @@ a:hover{
 
 .section3 .grid-item p {
   font-size: 18px;
-  color: #fff;
+  color: var(--paragraph-color);
   margin: 10px 0 0;
 }
 
@@ -262,8 +276,8 @@ a:hover{
   margin-top: 30px;
   padding: 10px 20px;
   font-size: 1.2rem;
-  color: #3083ff;
-  background-color: #ffffff;
+  color: var(--text-color);
+  background-color: var(--card-bg);
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -271,25 +285,25 @@ a:hover{
 }
 
 .section3 .cta-button:hover {
-  background-color: #0056b3;
+  background-color: var(--shadow-color);
 }
 
 .section4 {
   text-align: center;
-  background-color: #fff;
+  background-color: var(--bg-color);
   padding: 40px 20px;
 }
 
 .section4 .header h2 {
   font-size: 36px;
   font-weight: bold;
-  color: #3083ff;
+  color: var(--heading-color);
   margin-bottom: 20px;
 }
 
 .section4 .header p {
   font-size: 18px;
-  color: #333;
+  color: var(--paragraph-color);
   margin-bottom: 40px;
 }
 
@@ -304,7 +318,7 @@ a:hover{
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: #f8f9fa;
+  background-color: var(--card-bg);
   border-radius: 10px;
   padding: 20px;
   max-width: 600px;
@@ -319,7 +333,7 @@ a:hover{
 }
 
 .section4 .review-text {
-  color: #333;
+  color: var(--paragraph-color);
   margin-left: 20px;
 }
 
@@ -328,7 +342,7 @@ a:hover{
 }
 
 .section4 .stars {
-  color: #ffc107;
+  color: var(--heading-color);
   margin-top: 10px;
 }
 

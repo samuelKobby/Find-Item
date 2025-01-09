@@ -21,12 +21,23 @@ body {
 
 .Footer {
   background-color: #3083ff;
-  padding: 5px 0;
+  padding: 40px 0;
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+/* Dark mode override */
+.dark-mode .Footer {
+  background-color: var(--card-bg);
 }
 
 .Footer svg{
   fill: #ffffff;
   margin-top: -5px;
+}
+
+.dark-mode .Footer svg {
+  fill: var(--text-color);
 }
 
 .footer-col {
@@ -43,6 +54,18 @@ body {
   flex: 1;
 }
 
+:root {
+  --footer-text: #ffffff;
+  --footer-heading: #ffffff;
+  --footer-link: #ffffff;
+}
+
+.dark-mode {
+  --footer-text: var(--text-color);
+  --footer-heading: var(--heading-color);
+  --footer-link: var(--paragraph-color);
+}
+
 .footer-col h3, .footer-col h5 {
   font-size: 18px;
   color: #ffffff;
@@ -50,6 +73,11 @@ body {
   margin-bottom: 35px;
   font-weight: 500;
   position: relative;
+}
+
+.dark-mode .footer-col h3,
+.dark-mode .footer-col h5 {
+  color: var(--heading-color);
 }
 
 .footer-col h3::before, .footer-col h5::before {
@@ -64,9 +92,14 @@ body {
 
 .footer-col p, .footer-col ul li a {
   font-size: 16px;
-  color: #fff;
+  color: #ffffff;
   text-decoration: none;
   transition: all 0.3s ease;
+}
+
+.dark-mode .footer-col p,
+.dark-mode .footer-col ul li a {
+  color: var(--paragraph-color);
 }
 
 .footer-col p {
@@ -83,8 +116,12 @@ body {
 }
 
 .footer-col ul li a:hover {
-  color: #ffffff;
+  color: #f0f0f0;
   padding-left: 8px;
+}
+
+.dark-mode .footer-col ul li a:hover {
+  color: var(--text-color);
 }
 
 .social a {
@@ -98,6 +135,10 @@ body {
   border-radius: 50%;
   color: #ffffff;
   transition: all 0.5s ease;
+}
+
+.dark-mode .social a {
+  color: var(--text-color);
 }
 
 .social a:hover {
