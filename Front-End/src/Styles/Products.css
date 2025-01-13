@@ -17,7 +17,7 @@ body {
 
 .product-head p {
   font-size: 1em;
-  color: #666;
+  color: var(--paragraph-color);
   line-height: 1.6;
   max-width: 800px;
   margin: 0 auto 40px auto;

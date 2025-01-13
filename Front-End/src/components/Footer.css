@@ -154,7 +154,7 @@ body {
 }
 
 .copytext{
-  color: #24262b;
+  color: var(--text-color);
   font-size: 15px;
   padding: 10px;
 }

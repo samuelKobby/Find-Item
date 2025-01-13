@@ -160,6 +160,8 @@
 .booking-form label {
     display: block;
     font-weight: bold;
+    color: #111827 !important;
+    -webkit-text-fill-color: #111827 !important;
 }
 
 .booking-form input,
@@ -168,7 +170,18 @@
     padding: 10px;
     margin-top: 5px;
     border-radius: 4px;
-    border: 1px solid #ccc;
+    border: 1px solid #ccc !important;
+    background-color: #ffffff !important;
+    color: #111827 !important;
+    -webkit-text-fill-color: #111827 !important;
+    -webkit-background-fill-color: #ffffff !important;
+    forced-color-adjust: none;
+}
+
+.booking-form input::placeholder,
+.booking-form textarea::placeholder {
+    color: #666666 !important;
+    -webkit-text-fill-color: #666666 !important;
 }
 
 .booking-form button {

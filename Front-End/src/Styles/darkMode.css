@@ -8,6 +8,8 @@
   --card-bg: #ffffff;
   --sidebar-bg: #ffffff;
   --shadow-color: rgba(0, 0, 0, 0.1);
+  --sec3-texth: #ffffff;
+  --sec3-textp: #ffffff;
 }
 
 .dark-mode {
@@ -19,6 +21,8 @@
   --card-bg: #1f2937;
   --sidebar-bg: #1f2937;
   --shadow-color: rgba(0, 0, 0, 0.3);
+  --sec3-texth: #f3f4f6;
+  --sec3-textp: #babec5;
 }
 
 /* Global styles */
