@@ -97,7 +97,7 @@ function Products() {
         ))}
       </div>
       {visibleProducts < products.length && (
-        <button onClick={showMoreProducts} className="load-more">
+        <button onClick={showMoreProducts} className="show-more-button">
           Load More
         </button>
       )}
