@@ -1,0 +1,115 @@
+.login-container {
+  max-width: 400px;
+  margin: 40px auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: var(--card-color);
+  transition: background-color 0.3s ease;
+  padding: 20px;
+  border: none;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(10px);
+  /* Frosted glass effect */
+  -webkit-backdrop-filter: blur(10px);
+  /* Frosted glass effect for Safari */
+  overflow: hidden;
+  /* Ensures the frosted area stays within the rounded border */
+  margin: auto;
+  /* Center horizontally */
+  transform: translateY(20px);
+  margin-top: 100px;
+}
+
+.login-form {
+  background-color: #ffffff !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.login-container h2 {
+  text-align: center;
+  color: #333333;
+  transition: color 0.3s ease;
+}
+
+.dark-mode .login-container h2 {
+  color: #ffffff;
+}
+
+.login-form label {
+  display: block;
+  margin-bottom: 5px;
+  color: #333333 !important;
+  font-weight: 500;
+}
+
+.form-group input[type="text"],
+.form-group input[type="password"],
+.form-group input[type="email"] {
+  width: 100%;
+  padding: 8px 12px;
+  background-color: #ffffff !important;
+  color: #333333 !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #3083ff !important;
+  box-shadow: 0 0 0 0.2rem rgba(48, 131, 255, 0.25) !important;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.remember-me input[type="checkbox"] {
+  margin: 0;
+}
+
+.login-button {
+  width: 100%;
+  padding: 10px;
+  background-color: #3083ff !important;
+  color: #ffffff !important;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.login-button:hover {
+  background-color: #2563eb !important;
+}
+
+.error-message {
+  background-color: #ffebee;
+  color: #dc2626 !important;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  text-align: center;
+  border: 1px solid #ef9a9a;
+}
+
+.switch-mode {
+  display: block;
+  width: 100%;
+  padding: 8px;
+  margin-top: 15px;
+  background: none;
+  border: none;
+  color: #2196f3;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.switch-mode:hover {
+  color: #1976d2;
+}
