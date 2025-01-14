@@ -1,0 +1,74 @@
+/* Dark mode global styles */
+:root {
+  --bg-color: #ffffff;
+  --text-color: #111827;
+  --heading-color: #333333;
+  --paragraph-color: #4b5563;
+  --nav-bg: #ffffff;
+  --card-bg: #ffffff;
+  --sidebar-bg: #ffffff;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --sec3-texth: #ff0b0b;
+  --sec3-textp: #ffffff;
+}
+
+.dark-mode {
+  --bg-color: #111827;
+  --text-color: #d1d5db;
+  --heading-color: #f3f4f6;
+  --paragraph-color: #babec5;
+  --nav-bg: #111827;
+  --card-bg: #1f2937;
+  --sidebar-bg: #1f2937;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --sec3-texth: #f3f4f6;
+  --sec3-textp: #babec5;
+}
+
+/* Global styles */
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--heading-color);
+}
+
+/* Paragraphs */
+p {
+  color: var(--paragraph-color);
+}
+
+/* Cards */
+.card,
+.product-card,
+.event-card,
+.booking-card {
+  background-color: var(--card-bg);
+  box-shadow: 0 2px 4px var(--shadow-color);
+}
+
+/* Admin Sidebar */
+.sidebar {
+  background-color: var(--sidebar-bg);
+  border-right: 1px solid var(--shadow-color);
+}
+
+/* Form inputs in dark mode */
+.dark-mode input,
+.dark-mode textarea,
+.dark-mode select {
+  background-color: #374151;
+  color: var(--text-color);
+  border-color: #4b5563;
+}
+
+.dark-mode input:focus,
+.dark-mode textarea:focus,
+.dark-mode select:focus {
+  border-color: #3083ff;
+  outline: none;
+}
