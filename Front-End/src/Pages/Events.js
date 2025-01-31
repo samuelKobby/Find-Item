@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react';
 import '../Styles/Events.css';
-import eventImage1 from 'https://source.unsplash.com/6cL7lhb9t60'; // Image from Unsplash related to searching for items
-import eventImage2 from 'https://source.unsplash.com/RmGmV9qdyF8'; // Image from Unsplash related to retail or finding products
-import eventImage3 from 'https://source.unsplash.com/Ap0yt7Rb28k'; // Image from Unsplash related to shopping or discovering products
-import eventImage4 from 'https://source.unsplash.com/1xOIk0V5cUQ'; // Image from Unsplash related to online stores
+import eventImage1 from 'https://images.unsplash.com/photo-1593682617243-68b9f83e53b2'; // Lost item image 1
+import eventImage2 from 'https://images.unsplash.com/photo-1586444639847-0d50c6ef02c9'; // Lost item image 2
+import eventImage3 from 'https://images.unsplash.com/photo-1603766795718-621ccf9917e2'; // Lost item image 3
+import eventImage4 from 'https://images.unsplash.com/photo-1575084190553-c1ea9020f3a4'; // Lost item image 4
 
 const Events = () => {
   useEffect(() => {
@@ -30,31 +30,31 @@ const Events = () => {
   return (
     <div className="events-container">
       <div className="homepage" id='events'>
-      <div className="content">
-        <h1 className="title">Find Your Perfect Product</h1>
-        <p className="description">
-          Browse through a variety of items that suit your needs. Whether you’re looking for something specific or just browsing, we’ve got you covered. <br />Start your search now!
-        </p>
-        <button className="cta-button">Find Products</button>
+        <div className="content">
+          <h1 className="title">Find Your Lost Item</h1>
+          <p className="description">
+            If you've misplaced something, don't worry! Explore a range of lost item reports and events where you can track and recover your belongings. <br />We are here to help!
+          </p>
+          <button className="cta-button">Find Lost Items</button>
+        </div>
       </div>
-    </div>
-      <h1 className="events-title">Featured Products</h1>
+      <h1 className="events-title">Upcoming Lost Items</h1>
       <div className="events-content">
         <div className="event-card">
-          <img src={eventImage1} alt="Product Search" className="event-image" />
-          <p className="event-description">Looking for the latest trends? Explore a variety of products available for purchase and find exactly what you're looking for!</p>
+          <img src={eventImage1} alt="Lost Item 1" className="event-image" />
+          <p className="event-description">Lost Wallet – Join our event to track down a missing wallet. We’ll help you find it!</p>
         </div>
         <div className="event-card">
-          <p className="event-description">Searching for the best deals on gadgets and apparel? Our platform lets you easily find the top-rated products and reviews, all in one place!</p>
-          <img src={eventImage2} alt="Retail Shopping" className="event-image" />
+          <p className="event-description">Missing Laptop – If you lost your laptop, don’t miss out on our event dedicated to tracking it down!</p>
+          <img src={eventImage2} alt="Lost Item 2" className="event-image" />
         </div>
         <div className="event-card">
-          <img src={eventImage3} alt="Product Discovery" className="event-image" />
-          <p className="event-description">Join our community to discover the most popular products, compare prices, and find great discounts across various categories!</p>
+          <img src={eventImage3} alt="Lost Item 3" className="event-image" />
+          <p className="event-description">Lost Phone – Is your phone missing? Join our event to report it and get updates on its recovery.</p>
         </div>
         <div className="event-card">
-          <p className="event-description">Looking to buy something specific? Browse through our platform to find the perfect product from trusted sellers and vendors.</p>
-          <img src={eventImage4} alt="Online Shopping" className="event-image" />
+          <p className="event-description">Found Backpack – We found a backpack! If it's yours, come check it out at our event.</p>
+          <img src={eventImage4} alt="Lost Item 4" className="event-image" />
         </div>
       </div>
     </div>

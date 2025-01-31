@@ -685,72 +685,72 @@ const Admin = () => {
     <h2>Dashboard</h2>
     <div className="dashboard-overview">
       <div className="dashboard-card">
-        <h3>Monthly Orders</h3>
+        <h3>Items Reported</h3>
         <p>18</p>
-        <small>5 Fulfilled</small>
+        <small>5 Recovered</small>
       </div>
       <div className="dashboard-card">
-        <h3>Active Orders</h3>
+        <h3>Active Search Requests</h3>
         <p>15</p>
         <small>3 Pending</small>
       </div>
       <div className="dashboard-card">
-        <h3>Weekly Orders</h3>
+        <h3>Weekly Reports</h3>
         <p>4</p>
-        <small>1 Completed</small>
+        <small>1 Found</small>
       </div>
       <div className="dashboard-card">
-        <h3>Productivity</h3>
+        <h3>System Engagement</h3>
         <p>80%</p>
         <small>20% Pending</small>
       </div>
     </div>
     <div className="active-projects">
-      <h3>Active Orders</h3>
+      <h3>Active Search Requests</h3>
       <table>
         <thead>
           <tr>
-            <th>Pharmacy Name</th>
-            <th>Order ID</th>
+            <th>Item Name</th>
+            <th>Request ID</th>
             <th>Status</th>
-            <th>Medication Image</th>
-            <th>Order Completion</th>
+            <th>Item Image</th>
+            <th>Recovery Status</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>Campus Pharmacy</td>
+            <td>Lost Wallet</td>
             <td>#2389</td>
-            <td>Fulfilled</td>
-            <td><img src="https://images.unsplash.com/photo-1549465220-1a8b9238cd48" alt="medication" className="team-avatar" /></td>
+            <td>Recovered</td>
+            <td><img src="https://images.unsplash.com/photo-1593692247595-dc1459e50f35" alt="lost wallet" className="team-avatar" /></td>
             <td>100%</td>
           </tr>
           <tr>
-            <td>Health Center Pharmacy</td>
+            <td>Missing Laptop</td>
             <td>#2401</td>
             <td>Pending</td>
-            <td><img src="https://images.unsplash.com/photo-1530103862676-de8c9debad1d" alt="medication" className="team-avatar" /></td>
+            <td><img src="https://images.unsplash.com/photo-1585858224017-635b221234f7" alt="lost laptop" className="team-avatar" /></td>
             <td>50%</td>
           </tr>
           <tr>
-            <td>Campus Pharmacy</td>
+            <td>Found Phone</td>
             <td>#2412</td>
-            <td>Fulfilled</td>
-            <td><img src="https://images.unsplash.com/photo-1519638399535-1b036603ac77" alt="medication" className="team-avatar" /></td>
+            <td>Recovered</td>
+            <td><img src="https://images.unsplash.com/photo-1522748962058-d0241b01d56c" alt="found phone" className="team-avatar" /></td>
             <td>100%</td>
           </tr>
           <tr>
-            <td>Student Pharmacy</td>
+            <td>Lost Jacket</td>
             <td>#2447</td>
             <td>Pending</td>
-            <td><img src="https://images.unsplash.com/photo-1526304640581-d334cdbbf45e" alt="medication" className="team-avatar" /></td>
+            <td><img src="https://images.unsplash.com/photo-1565736607-df10a8ed5050" alt="lost jacket" className="team-avatar" /></td>
             <td>20%</td>
           </tr>
           <tr>
-            <td>Health Center Pharmacy</td>
+            <td>Found Backpack</td>
             <td>#2489</td>
-            <td>Fulfilled</td>
-            <td><img src="https://images.unsplash.com/photo-1531482615713-2afd69aaf16" alt="medication" className="team-avatar" /></td>
+            <td>Recovered</td>
+            <td><img src="https://images.unsplash.com/photo-1586000073907-8f389d522c7e" alt="found backpack" className="team-avatar" /></td>
             <td>100%</td>
           </tr>
         </tbody>
@@ -758,6 +758,7 @@ const Admin = () => {
     </div>
   </div>
 )}
+
 
         {selectedSection === 'bookings' && (
           <div id="admin-bookings-section">
