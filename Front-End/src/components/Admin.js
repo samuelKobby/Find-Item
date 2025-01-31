@@ -758,8 +758,6 @@ const Admin = () => {
             </div>
           </div>
         )}
-</div>
-        )}
         {selectedSection === 'bookings' && (
           <div id="admin-bookings-section">
             <h2>Bookings</h2>
