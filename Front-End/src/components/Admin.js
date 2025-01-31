@@ -680,84 +680,85 @@ const Admin = () => {
 
       </div>
       <div id="admin-content">
-        {selectedSection === 'dashboard' && (
-          <div id="admin-dashboard-section">
-            <h2>Dashboard</h2>
-            <div className="dashboard-overview">
-              <div className="dashboard-card">
-                <h3>Monthly Orders</h3>
-                <p>18</p>
-                <small>2 Completed</small>
-              </div>
-              <div className="dashboard-card">
-                <h3>Active Orders</h3>
-                <p>15</p>
-                <small>28 Completed</small>
-              </div>
-              <div className="dashboard-card">
-                <h3>Weekly Orders</h3>
-                <p>4</p>
-                <small>1 Completed</small>
-              </div>
-              <div className="dashboard-card">
-                <h3>Productivity</h3>
-                <p>76%</p>
-                <small>5% Completed</small>
-              </div>
-            </div>
-            <div className="active-projects">
-              <h3>Active Orders</h3>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Occasion Name</th>
-                    <th>Hours</th>
-                    <th>Priority</th>
-                    <th>Sample Image</th>
-                    <th>Performance</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>Birthday Celebration</td>
-                    <td>6</td>
-                    <td>Medium</td>
-                    <td><img src="https://images.unsplash.com/photo-1549465220-1a8b9238cd48" alt="team" className="team-avatar" /></td>
-                    <td>89%</td>
-                  </tr>
-                  <tr>
-                    <td>Birthday Celebration</td>
-                    <td>6</td>
-                    <td>Medium</td>
-                    <td><img src="https://images.unsplash.com/photo-1530103862676-de8c9debad1d" alt="team" className="team-avatar" /></td>
-                    <td>89%</td>
-                  </tr>
-                  <tr>
-                    <td>Birthday Celebration</td>
-                    <td>6</td>
-                    <td>Medium</td>
-                    <td><img src="https://images.unsplash.com/photo-1519638399535-1b036603ac77" alt="team" className="team-avatar" /></td>
-                    <td>89%</td>
-                  </tr>
-                  <tr>
-                    <td>Birthday Celebration</td>
-                    <td>6</td>
-                    <td>Medium</td>
-                    <td><img src="https://images.unsplash.com/photo-1526304640581-d334cdbbf45e" alt="team" className="team-avatar" /></td>
-                    <td>89%</td>
-                  </tr>
-                  <tr>
-                    <td>Birthday Celebration</td>
-                    <td>6</td>
-                    <td>Medium</td>
-                    <td><img src="https://images.unsplash.com/photo-1531482615713-2afd69aaf16" alt="team" className="team-avatar" /></td>
-                    <td>89%</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
+      {selectedSection === 'dashboard' && (
+  <div id="admin-dashboard-section">
+    <h2>Dashboard</h2>
+    <div className="dashboard-overview">
+      <div className="dashboard-card">
+        <h3>Monthly Orders</h3>
+        <p>18</p>
+        <small>5 Fulfilled</small>
+      </div>
+      <div className="dashboard-card">
+        <h3>Active Orders</h3>
+        <p>15</p>
+        <small>3 Pending</small>
+      </div>
+      <div className="dashboard-card">
+        <h3>Weekly Orders</h3>
+        <p>4</p>
+        <small>1 Completed</small>
+      </div>
+      <div className="dashboard-card">
+        <h3>Productivity</h3>
+        <p>80%</p>
+        <small>20% Pending</small>
+      </div>
+    </div>
+    <div className="active-projects">
+      <h3>Active Orders</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Pharmacy Name</th>
+            <th>Order ID</th>
+            <th>Status</th>
+            <th>Medication Image</th>
+            <th>Order Completion</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Campus Pharmacy</td>
+            <td>#2389</td>
+            <td>Fulfilled</td>
+            <td><img src="https://images.unsplash.com/photo-1549465220-1a8b9238cd48" alt="medication" className="team-avatar" /></td>
+            <td>100%</td>
+          </tr>
+          <tr>
+            <td>Health Center Pharmacy</td>
+            <td>#2401</td>
+            <td>Pending</td>
+            <td><img src="https://images.unsplash.com/photo-1530103862676-de8c9debad1d" alt="medication" className="team-avatar" /></td>
+            <td>50%</td>
+          </tr>
+          <tr>
+            <td>Campus Pharmacy</td>
+            <td>#2412</td>
+            <td>Fulfilled</td>
+            <td><img src="https://images.unsplash.com/photo-1519638399535-1b036603ac77" alt="medication" className="team-avatar" /></td>
+            <td>100%</td>
+          </tr>
+          <tr>
+            <td>Student Pharmacy</td>
+            <td>#2447</td>
+            <td>Pending</td>
+            <td><img src="https://images.unsplash.com/photo-1526304640581-d334cdbbf45e" alt="medication" className="team-avatar" /></td>
+            <td>20%</td>
+          </tr>
+          <tr>
+            <td>Health Center Pharmacy</td>
+            <td>#2489</td>
+            <td>Fulfilled</td>
+            <td><img src="https://images.unsplash.com/photo-1531482615713-2afd69aaf16" alt="medication" className="team-avatar" /></td>
+            <td>100%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+)}
+
         {selectedSection === 'bookings' && (
           <div id="admin-bookings-section">
             <h2>Bookings</h2>
