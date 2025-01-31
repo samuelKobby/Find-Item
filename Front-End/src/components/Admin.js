@@ -707,34 +707,15 @@ const Admin = () => {
             </div>
             <div className="interactive-statistics">
               <h3>Interactive Statistics</h3>
-              <canvas id="reportsChart"></canvas>
+              <p>Reports over time (mock-up data)</p>
+              <ul>
+                <li>January: 15 reports</li>
+                <li>February: 20 reports</li>
+                <li>March: 25 reports</li>
+                <li>April: 18 reports</li>
+                <li>May: 30 reports</li>
+              </ul>
             </div>
-            <script>
-              document.addEventListener("DOMContentLoaded", function() {
-                const ctx = document.getElementById('reportsChart').getContext('2d');
-                new Chart(ctx, {
-                  type: 'bar',
-                  data: {
-                    labels: ['January', 'February', 'March', 'April', 'May'],
-                    datasets: [{
-                      label: 'Reports per Month',
-                      data: [15, 20, 25, 18, 30],
-                      backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                      borderColor: 'rgba(75, 192, 192, 1)',
-                      borderWidth: 1
-                    }]
-                  },
-                  options: {
-                    responsive: true,
-                    scales: {
-                      y: {
-                        beginAtZero: true
-                      }
-                    }
-                  }
-                });
-              });
-            </script>
             <div className="active-projects">
               <h3>Active Reports</h3>
               <table>
