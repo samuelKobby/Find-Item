@@ -685,90 +685,80 @@ const Admin = () => {
             <h2>Dashboard</h2>
             <div className="dashboard-overview">
               <div className="dashboard-card">
-                <h3>Monthly Reports</h3>
-                <p>25</p>
-                <small>10 Resolved</small>
+                <h3>Monthly Orders</h3>
+                <p>18</p>
+                <small>2 Completed</small>
               </div>
               <div className="dashboard-card">
-                <h3>Active Reports</h3>
-                <p>12</p>
-                <small>30 Resolved</small>
+                <h3>Active Orders</h3>
+                <p>15</p>
+                <small>28 Completed</small>
               </div>
               <div className="dashboard-card">
-                <h3>Weekly Reports</h3>
-                <p>7</p>
-                <small>3 Resolved</small>
+                <h3>Weekly Orders</h3>
+                <p>4</p>
+                <small>1 Completed</small>
               </div>
               <div className="dashboard-card">
-                <h3>Recovery Rate</h3>
-                <p>82%</p>
-                <small>Improved by 5%</small>
+                <h3>Productivity</h3>
+                <p>76%</p>
+                <small>5% Completed</small>
               </div>
-            </div>
-            <div className="interactive-statistics">
-              <h3>Interactive Statistics</h3>
-              <p>Reports over time (mock-up data)</p>
-              <ul>
-                <li>January: 15 reports</li>
-                <li>February: 20 reports</li>
-                <li>March: 25 reports</li>
-                <li>April: 18 reports</li>
-                <li>May: 30 reports</li>
-              </ul>
             </div>
             <div className="active-projects">
-              <h3>Active Reports</h3>
+              <h3>Active Orders</h3>
               <table>
                 <thead>
                   <tr>
-                    <th>Item Name</th>
-                    <th>Reported Date</th>
-                    <th>Location Found</th>
-                    <th>Image</th>
-                    <th>Status</th>
+                    <th>Occasion Name</th>
+                    <th>Hours</th>
+                    <th>Priority</th>
+                    <th>Sample Image</th>
+                    <th>Performance</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td>Student ID Card</td>
-                    <td>2025-01-28</td>
-                    <td>Library</td>
-                    <td><img src="https://via.placeholder.com/100" alt="item" className="team-avatar" /></td>
-                    <td>Pending</td>
+                    <td>Birthday Celebration</td>
+                    <td>6</td>
+                    <td>Medium</td>
+                    <td><img src="https://images.unsplash.com/photo-1549465220-1a8b9238cd48" alt="team" className="team-avatar" /></td>
+                    <td>89%</td>
                   </tr>
                   <tr>
-                    <td>Backpack</td>
-                    <td>2025-01-26</td>
-                    <td>Cafeteria</td>
-                    <td><img src="https://via.placeholder.com/100" alt="item" className="team-avatar" /></td>
-                    <td>Recovered</td>
+                    <td>Birthday Celebration</td>
+                    <td>6</td>
+                    <td>Medium</td>
+                    <td><img src="https://images.unsplash.com/photo-1530103862676-de8c9debad1d" alt="team" className="team-avatar" /></td>
+                    <td>89%</td>
                   </tr>
                   <tr>
-                    <td>Wallet</td>
-                    <td>2025-01-25</td>
-                    <td>Lecture Hall</td>
-                    <td><img src="https://via.placeholder.com/100" alt="item" className="team-avatar" /></td>
-                    <td>Pending</td>
+                    <td>Birthday Celebration</td>
+                    <td>6</td>
+                    <td>Medium</td>
+                    <td><img src="https://images.unsplash.com/photo-1519638399535-1b036603ac77" alt="team" className="team-avatar" /></td>
+                    <td>89%</td>
                   </tr>
                   <tr>
-                    <td>Phone</td>
-                    <td>2025-01-22</td>
-                    <td>Sports Complex</td>
-                    <td><img src="https://via.placeholder.com/100" alt="item" className="team-avatar" /></td>
-                    <td>Recovered</td>
+                    <td>Birthday Celebration</td>
+                    <td>6</td>
+                    <td>Medium</td>
+                    <td><img src="https://images.unsplash.com/photo-1526304640581-d334cdbbf45e" alt="team" className="team-avatar" /></td>
+                    <td>89%</td>
                   </tr>
                   <tr>
-                    <td>Keys</td>
-                    <td>2025-01-20</td>
-                    <td>Admin Block</td>
-                    <td><img src="https://via.placeholder.com/100" alt="item" className="team-avatar" /></td>
-                    <td>Pending</td>
+                    <td>Birthday Celebration</td>
+                    <td>6</td>
+                    <td>Medium</td>
+                    <td><img src="https://images.unsplash.com/photo-1531482615713-2afd69aaf16" alt="team" className="team-avatar" /></td>
+                    <td>89%</td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </div>
-
+        )}
+</div>
         )}
         {selectedSection === 'bookings' && (
           <div id="admin-bookings-section">

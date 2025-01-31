@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react';
 import '../Styles/Events.css';
-import eventImage1 from '../Images/found_item1.png';
-import eventImage2 from '../Images/found_item2.png';
-import eventImage3 from '../Images/found_item3.png';
-import eventImage4 from '../Images/found_item4.png';
+import eventImage1 from '../Images/bobablue.png';
+import eventImage2 from '../Images/bob1.png';
+import eventImage3 from '../Images/boba.png';
+import eventImage4 from '../Images/Nonalcohol.png';
 
 const Events = () => {
   useEffect(() => {
@@ -27,35 +27,74 @@ const Events = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const titleStyle = {
+    color: 'white',
+    fontSize: '3rem',
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: '20px',
+    textShadow: '2px 2px 5px rgba(0, 0, 0, 0.3)', // Optional shadow for better visibility
+  };
+
+  const descriptionStyle = {
+    color: 'white',
+    fontSize: '1.25rem',
+    textAlign: 'center',
+    marginBottom: '40px',
+    lineHeight: '1.6',
+  };
+
+  const eventDescriptionStyle = {
+    color: 'white',
+    fontSize: '1rem',
+    textAlign: 'left',
+    margin: '10px',
+    lineHeight: '1.6',
+  };
+
+  const ctaButtonStyle = {
+    backgroundColor: '#ff6347',
+    color: 'white',
+    padding: '12px 24px',
+    fontSize: '1.1rem',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    transition: 'background-color 0.3s ease',
+  };
+
+  const ctaButtonHoverStyle = {
+    backgroundColor: '#ff4500', // Darker shade on hover
+  };
+
   return (
     <div className="events-container">
       <div className="homepage" id='events'>
-      <div className="content">
-        <h1 className="title">Lost & Found <br/>Helping You <br/>Reunite with Items.</h1>
-        <p className="description">
-          Our platform helps you track and recover lost items. <br />Report lost items, browse found reports,<br /> 
-          and connect with finders to get your belongings back.<br />Join our community effort today!
-        </p>
-        <button className="cta-button">Explore Reports</button>
+        <div className="content">
+          <h1 className="title" style={titleStyle}>Find Your Perfect Event</h1>
+          <p className="description" style={descriptionStyle}>
+            Explore a wide range of events that cater to every interest. Whether it's a casual gathering or a special celebration, find the perfect event to attend. <br />We have something for everyone.
+          </p>
+          <button className="cta-button" style={ctaButtonStyle}>Find Events</button>
+        </div>
       </div>
-    </div>
-      <h1 className="events-title">Recent Finds</h1>
+      <h1 className="events-title" style={titleStyle}>Upcoming Events</h1>
       <div className="events-content">
         <div className="event-card">
-          <img src={eventImage1} alt="Lost Wallet" className="event-image" />
-          <p className="event-description">A black leather wallet was found near the library entrance. Contains student ID and bank cards. If this belongs to you, please contact the admin office.</p>
+          <img src={eventImage1} alt="Event 1" className="event-image" />
+          <p className="event-description" style={eventDescriptionStyle}>Looking for a fun boba tea event? Join us for a night of tastings, special flavors, and giveaways. Don’t miss out!</p>
         </div>
         <div className="event-card">
-          <p className="event-description">A red backpack was left in the cafeteria. It contains textbooks and a water bottle. If it's yours, visit the lost & found section in the admin block.</p>
-          <img src={eventImage2} alt="Lost Backpack" className="event-image" />
+          <p className="event-description" style={eventDescriptionStyle}>Get ready for an exciting evening of non-alcoholic drinks, mocktails, and socializing with friends. Perfect for anyone looking to relax and enjoy good company!</p>
+          <img src={eventImage2} alt="Event 2" className="event-image" />
         </div>
         <div className="event-card">
-          <img src={eventImage3} alt="Lost Phone" className="event-image" />
-          <p className="event-description">A white iPhone was found near the sports complex. It's locked and has a cracked screen. Contact security with proof of ownership.</p>
+          <img src={eventImage3} alt="Event 3" className="event-image" />
+          <p className="event-description" style={eventDescriptionStyle}>Join our boba event for a unique experience where you can create your own drinks and discover new flavors. A perfect event for boba lovers!</p>
         </div>
         <div className="event-card">
-          <p className="event-description">A set of keys was discovered in the admin block. It has a blue keychain. If these belong to you, claim them at the security office.</p>
-          <img src={eventImage4} alt="Lost Keys" className="event-image" />
+          <p className="event-description" style={eventDescriptionStyle}>Come along to our non-alcoholic drinks gathering. Sip on delicious mocktails and mingle with like-minded people. A fun and refreshing way to spend your evening!</p>
+          <img src={eventImage4} alt="Event 4" className="event-image" />
         </div>
       </div>
     </div>
