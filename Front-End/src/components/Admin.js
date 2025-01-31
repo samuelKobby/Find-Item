@@ -685,78 +685,109 @@ const Admin = () => {
             <h2>Dashboard</h2>
             <div className="dashboard-overview">
               <div className="dashboard-card">
-                <h3>Monthly Orders</h3>
-                <p>18</p>
-                <small>2 Completed</small>
+                <h3>Monthly Reports</h3>
+                <p>25</p>
+                <small>10 Resolved</small>
               </div>
               <div className="dashboard-card">
-                <h3>Active Orders</h3>
-                <p>15</p>
-                <small>28 Completed</small>
+                <h3>Active Reports</h3>
+                <p>12</p>
+                <small>30 Resolved</small>
               </div>
               <div className="dashboard-card">
-                <h3>Weekly Orders</h3>
-                <p>4</p>
-                <small>1 Completed</small>
+                <h3>Weekly Reports</h3>
+                <p>7</p>
+                <small>3 Resolved</small>
               </div>
               <div className="dashboard-card">
-                <h3>Productivity</h3>
-                <p>76%</p>
-                <small>5% Completed</small>
+                <h3>Recovery Rate</h3>
+                <p>82%</p>
+                <small>Improved by 5%</small>
               </div>
             </div>
+            <div className="interactive-statistics">
+              <h3>Interactive Statistics</h3>
+              <canvas id="reportsChart"></canvas>
+            </div>
+            <script>
+              document.addEventListener("DOMContentLoaded", function() {
+                const ctx = document.getElementById('reportsChart').getContext('2d');
+                new Chart(ctx, {
+                  type: 'bar',
+                  data: {
+                    labels: ['January', 'February', 'March', 'April', 'May'],
+                    datasets: [{
+                      label: 'Reports per Month',
+                      data: [15, 20, 25, 18, 30],
+                      backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                      borderColor: 'rgba(75, 192, 192, 1)',
+                      borderWidth: 1
+                    }]
+                  },
+                  options: {
+                    responsive: true,
+                    scales: {
+                      y: {
+                        beginAtZero: true
+                      }
+                    }
+                  }
+                });
+              });
+            </script>
             <div className="active-projects">
-              <h3>Active Orders</h3>
+              <h3>Active Reports</h3>
               <table>
                 <thead>
                   <tr>
-                    <th>Occasion Name</th>
-                    <th>Hours</th>
-                    <th>Priority</th>
-                    <th>Sample Image</th>
-                    <th>Performance</th>
+                    <th>Item Name</th>
+                    <th>Reported Date</th>
+                    <th>Location Found</th>
+                    <th>Image</th>
+                    <th>Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td>Birthday Celebration</td>
-                    <td>6</td>
-                    <td>Medium</td>
-                    <td><img src={defaultproductImage} alt="team" className="team-avatar" /></td>
-                    <td>89%</td>
+                    <td>Student ID Card</td>
+                    <td>2025-01-28</td>
+                    <td>Library</td>
+                    <td><img src="https://via.placeholder.com/100" alt="item" className="team-avatar" /></td>
+                    <td>Pending</td>
                   </tr>
                   <tr>
-                    <td>Birthday Celebration</td>
-                    <td>6</td>
-                    <td>Medium</td>
-                    <td><img src={defaultproductImage} alt="team" className="team-avatar" /></td>
-                    <td>89%</td>
+                    <td>Backpack</td>
+                    <td>2025-01-26</td>
+                    <td>Cafeteria</td>
+                    <td><img src="https://via.placeholder.com/100" alt="item" className="team-avatar" /></td>
+                    <td>Recovered</td>
                   </tr>
                   <tr>
-                    <td>Birthday Celebration</td>
-                    <td>6</td>
-                    <td>Medium</td>
-                    <td><img src={defaultproductImage} alt="team" className="team-avatar" /></td>
-                    <td>89%</td>
+                    <td>Wallet</td>
+                    <td>2025-01-25</td>
+                    <td>Lecture Hall</td>
+                    <td><img src="https://via.placeholder.com/100" alt="item" className="team-avatar" /></td>
+                    <td>Pending</td>
                   </tr>
                   <tr>
-                    <td>Birthday Celebration</td>
-                    <td>6</td>
-                    <td>Medium</td>
-                    <td><img src={defaultproductImage} alt="team" className="team-avatar" /></td>
-                    <td>89%</td>
+                    <td>Phone</td>
+                    <td>2025-01-22</td>
+                    <td>Sports Complex</td>
+                    <td><img src="https://via.placeholder.com/100" alt="item" className="team-avatar" /></td>
+                    <td>Recovered</td>
                   </tr>
                   <tr>
-                    <td>Birthday Celebration</td>
-                    <td>6</td>
-                    <td>Medium</td>
-                    <td><img src={defaultproductImage} alt="team" className="team-avatar" /></td>
-                    <td>89%</td>
+                    <td>Keys</td>
+                    <td>2025-01-20</td>
+                    <td>Admin Block</td>
+                    <td><img src="https://via.placeholder.com/100" alt="item" className="team-avatar" /></td>
+                    <td>Pending</td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </div>
+
         )}
         {selectedSection === 'bookings' && (
           <div id="admin-bookings-section">
