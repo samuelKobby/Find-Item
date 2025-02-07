@@ -4,7 +4,7 @@ import '../Styles/ScrollToTop.css';
 import ScrollToTop from '../components/ScrollToTop';
 import team1 from '../Images/CEO.jpg';
 import team2 from '../Images/HC.jpg';
-import team3 from '../Images/bob6.png';
+import team3 from '../Images/MG.jpg';
 import Bobg from '../Images/Picture12.webp';
 
 const About = () => {
@@ -74,7 +74,7 @@ const About = () => {
             </div>
             <div className="team-member">
               <img src={team3} alt="Team Member 3" />
-              <h3>Mike Johnson</h3>
+              <h3>Elsie de-Graft-Owoo</h3>
               <p>Manager</p>
             </div>
           </div>
