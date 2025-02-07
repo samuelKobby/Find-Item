@@ -2,7 +2,7 @@ import React from 'react';
 import '../Styles/About.css';
 import '../Styles/ScrollToTop.css';
 import ScrollToTop from '../components/ScrollToTop';
-import team1 from '../Images/bo4.png';
+import team1 from '../Images/CEO.jpg';
 import team2 from '../Images/bob5.png';
 import team3 from '../Images/bob6.png';
 import Bobg from '../Images/Picture12.webp';
@@ -64,7 +64,7 @@ const About = () => {
           <div className="team-section">
             <div className="team-member">
               <img src={team1} alt="Team Member 1" />
-              <h3>John Doe</h3>
+              <h3>Samuel Gyasi Fordjour</h3>
               <p>Founder</p>
             </div>
             <div className="team-member">
