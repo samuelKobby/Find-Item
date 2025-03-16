@@ -39,7 +39,7 @@ const Navbar = () => {
           <div className={`nav-links ${menuOpen ? 'open' : ''}`}>
             <ul>
               <li>
-                <Link to="/home" className={location.pathname === "/home" ? 'active' : ''} onClick={handleLinkClick}>Home</Link>
+                {/* <Link to="/home" className={location.pathname === "/home" ? 'active' : ''} onClick={handleLinkClick}>Home</Link> */}
               </li>
               <li>
                 <div className="dropdown" onClick={toggleDropdown}>
