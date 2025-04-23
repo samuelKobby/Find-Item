@@ -1,97 +1,253 @@
-import React, { useEffect } from 'react';
+import React, { useState } from 'react';
 import '../Styles/Events.css';
 import { useTheme } from '../context/ThemeContext';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUpload, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import gadgetsImage from '../Images/gadgets.jpg';
 import accessoriesImage from '../Images/Accessories.jpg';
 import booksImage from '../Images/Books.jpg';
 import othersImage from '../Images/others.jpg';
+import Swal from 'sweetalert2';
+import { API_BASE_URL } from '../config/api';
 
 const Events = () => {
   const { darkMode } = useTheme();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [formData, setFormData] = useState({
+    itemName: '',
+    locationFound: '',
+    dropOffLocation: '',  
+    dateFound: '',
+    description: '',
+    finderName: '',
+    finderContact: '',
+    image: null
+  });
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const cards = document.querySelectorAll('.event-card');
-      const triggerBottom = window.innerHeight / 5 * 4;
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prevState => ({
+      ...prevState,
+      [name]: value
+    }));
+  };
 
-      cards.forEach(card => {
-        const cardTop = card.getBoundingClientRect().top;
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFormData(prevState => ({
+        ...prevState,
+        image: file
+      }));
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewUrl(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
-        if (cardTop < triggerBottom) {
-          card.classList.add('show');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    try {
+      const formDataToSend = new FormData();
+      Object.keys(formData).forEach(key => {
+        if (key === 'image' && formData[key]) {
+          formDataToSend.append('image', formData[key]);
         } else {
-          card.classList.remove('show');
+          formDataToSend.append(key, formData[key]);
         }
       });
-    };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+      const response = await fetch(`${API_BASE_URL}/api/reports`, {
+        method: 'POST',
+        body: formDataToSend,
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+          'Origin': window.location.origin
+        }
+      });
+
+      if (!response.ok) {
+        const contentType = response.headers.get('content-type');
+        let errorMessage;
+        
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await response.json();
+          errorMessage = errorData.message || 'Please try again.';
+        } else {
+          const text = await response.text();
+          errorMessage = 'Server error. Please try again later.';
+          console.error('Server response:', text);
+        }
+        
+        throw new Error(errorMessage);
+      }
+
+      const data = await response.json();
+      Swal.fire({
+        icon: 'success',
+        title: 'Report submitted successfully!',
+        text: 'Thank you for helping return lost items.',
+      });
+      
+      setFormData({
+        itemName: '',
+        locationFound: '',
+        dropOffLocation: 'security_office',
+        dateFound: '',
+        description: '',
+        finderName: '',
+        finderContact: '',
+        image: null
+      });
+      setPreviewUrl(null);
+    } catch (error) {
+      console.error('Error submitting report:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Submission failed',
+        text: error.message || 'Please try again.',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
-    <div className={`events-container ${darkMode ? 'dark-mode' : ''}`}>
-      <div className="homepage" id='events'>
-        <div className="content">
-          <h1 className="title">Success Stories <br/>& Community <br/>Events</h1>
-          <p className="description">
-            Discover heartwarming stories of reunited items <br />
-            and their owners. Join our community events to help <br />
-            make a difference in people's lives.
-          </p>
-          <button className="cta-button">View All Stories</button>
+    <div className={`events-page ${darkMode ? 'dark-mode' : ''}`}>
+      <div className="hero-section">
+        <div className="hero-content">
+          <h1>Report Found Items</h1>
+          <p>Help us return lost items to their rightful owners by reporting items you've found.</p>
         </div>
       </div>
-      
-      <h1 className="events-title">Recent Success Stories</h1>
-      <div className="events-content">
-        <div className="event-card">
-          <img src={gadgetsImage} alt="Lost Ring Found" className="event-image" />
-          <div className="event-details">
-            <h3>Wedding Ring Reunited</h3>
-            <p className="event-description">
-              After losing her wedding ring at Central Park, Sarah thought she'd never see it again. 
-              Thanks to our platform and the keen eye of John, a morning jogger, the precious ring was 
-              returned within 24 hours. This heartwarming reunion shows the power of our community.
-            </p>
-          </div>
-        </div>
 
-        <div className="event-card">
-          <div className="event-details">
-            <h3>Lost Laptop Recovery</h3>
-            <p className="event-description">
-              A student's crucial research work was saved when their lost laptop was found and returned 
-              through our platform. The finder used our quick response system to report the found item, 
-              and within hours, the laptop was back in the hands of its grateful owner.
-            </p>
+      <div className="report-form-section">
+        <form onSubmit={handleSubmit} className="report-form">
+          <div className="form-group">
+            <label htmlFor="itemName">Item Name*</label>
+            <input
+              type="text"
+              id="itemName"
+              name="itemName"
+              value={formData.itemName}
+              onChange={handleInputChange}
+              required
+            />
           </div>
-          <img src={accessoriesImage} alt="Laptop Return" className="event-image" />
-        </div>
 
-        <div className="event-card">
-          <img src={booksImage} alt="Pet Reunion" className="event-image" />
-          <div className="event-details">
-            <h3>Missing Pet Located</h3>
-            <p className="event-description">
-              When Max the Golden Retriever went missing, his family was devastated. Our platform's 
-              quick alert system and community network helped locate Max within the same day. This 
-              story highlights how our platform helps reunite not just items, but beloved pets too.
-            </p>
+          <div className="form-group">
+            <label htmlFor="locationFound">Location Found*</label>
+            <input
+              type="text"
+              id="locationFound"
+              name="locationFound"
+              value={formData.locationFound}
+              onChange={handleInputChange}
+              required
+            />
           </div>
-        </div>
 
-        <div className="event-card">
-          <div className="event-details">
-            <h3>Community Awareness Event</h3>
-            <p className="event-description">
-              Join us for our monthly community awareness event where we discuss best practices for 
-              preventing loss of valuable items and what to do when you find something. Learn about 
-              our platform's features and how to make the most of our lost-and-found network.
-            </p>
+          <div className="form-group">
+            <label htmlFor="dropOffLocation">Drop-off Location*</label>
+            <select
+              id="dropOffLocation"
+              name="dropOffLocation"
+              value={formData.dropOffLocation}
+              onChange={handleInputChange}
+              required
+            >
+              <option value="security_office">Security Office</option>
+              <option value="library">Library</option>
+              <option value="info_desk">Information Desk</option>
+              <option value="student_center">Student Center</option>
+            </select>
           </div>
-          <img src={othersImage} alt="Community Event" className="event-image" />
-        </div>
+
+          <div className="form-group">
+            <label htmlFor="dateFound">Date Found*</label>
+            <input
+              type="date"
+              id="dateFound"
+              name="dateFound"
+              value={formData.dateFound}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="description">Description*</label>
+            <textarea
+              id="description"
+              name="description"
+              value={formData.description}
+              onChange={handleInputChange}
+              required
+            ></textarea>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="finderName">Your Name*</label>
+            <input
+              type="text"
+              id="finderName"
+              name="finderName"
+              value={formData.finderName}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="finderContact">Your Contact*</label>
+            <input
+              type="text"
+              id="finderContact"
+              name="finderContact"
+              value={formData.finderContact}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="image">Image</label>
+            <div className="file-input-wrapper">
+              <input
+                type="file"
+                id="image"
+                name="image"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="file-input"
+              />
+              <div className="file-input-button">
+                <FontAwesomeIcon icon={faUpload} /> Choose Image
+              </div>
+            </div>
+            {previewUrl && (
+              <div className="image-preview">
+                <img src={previewUrl} alt="Preview" />
+              </div>
+            )}
+          </div>
+
+          <button type="submit" className="submit-button" disabled={isSubmitting}>
+            {isSubmitting ? (
+              <>
+                <FontAwesomeIcon icon={faSpinner} spin /> Submitting...
+              </>
+            ) : (
+              'Submit Report'
+            )}
+          </button>
+        </form>
       </div>
     </div>
   );
