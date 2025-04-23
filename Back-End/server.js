@@ -2,9 +2,11 @@ const express = require('express');
 const dotenv = require('dotenv');
 const connectDB = require('./src/config/db');
 const cors = require('cors');
+const path = require('path');
 const productRoutes = require('./src/routes/productRoutes');
 const bookingRoutes = require('./src/routes/bookingRoutes');
 const authRoutes = require('./src/routes/authRoutes');
+const reportRoutes = require('./src/routes/reportRoutes');
 
 dotenv.config();
 
@@ -32,6 +34,10 @@ app.use(cors({
 app.use('/api/products', productRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/reports', reportRoutes);
+
+// Serve uploaded files
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Simple route for testing
 app.get('/', (req, res) => {

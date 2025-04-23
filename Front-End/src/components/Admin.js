@@ -15,6 +15,7 @@ const Admin = () => {
   const [selectedSection, setSelectedSection] = useState('dashboard');
   const [products, setProducts] = useState([]);
   const [bookings, setBookings] = useState([]);
+  const [reports, setReports] = useState([]);
   const [editingProduct, setEditingProduct] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
@@ -83,7 +84,6 @@ const Admin = () => {
         ) : null
       }));
 
-      console.log('Products with images:', productsWithImages);
       setProducts(productsWithImages);
 
       // Fetch bookings
@@ -101,6 +101,23 @@ const Admin = () => {
       }
       const bookingsData = await bookingsResponse.json();
       setBookings(bookingsData);
+
+      // Fetch reports
+      const reportsResponse = await fetch(`${API_BASE_URL}/api/reports`, {
+        headers,
+        credentials: 'include'
+      });
+      if (!reportsResponse.ok) {
+        if (reportsResponse.status === 401) {
+          logout();
+          navigate('/login');
+          return;
+        }
+        throw new Error('Failed to fetch reports');
+      }
+      const reportsData = await reportsResponse.json();
+      setReports(reportsData);
+
     } catch (error) {
       console.error('Error fetching data:', error);
       Swal.fire('Error!', error.message, 'error');
@@ -662,13 +679,148 @@ const Admin = () => {
     </div>
   );
 
+  const handleUpdateReportStatus = async (reportId, newStatus) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/reports/${reportId}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${getAuthToken()}`,
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({ status: newStatus })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update report status');
+      }
+
+      // Update the reports state with the new status
+      setReports(prevReports =>
+        prevReports.map(report =>
+          report._id === reportId ? { ...report, status: newStatus } : report
+        )
+      );
+
+      Swal.fire('Success!', 'Report status updated successfully', 'success');
+    } catch (error) {
+      console.error('Error updating report status:', error);
+      Swal.fire('Error!', error.message || 'Failed to update report status', 'error');
+    }
+  };
+
+  const handleDeleteReport = async (reportId) => {
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: 'You will not be able to recover this report!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/reports/${reportId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${getAuthToken()}`
+          },
+          credentials: 'include'
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to delete report');
+        }
+
+        setReports(reports.filter(report => report._id !== reportId));
+        Swal.fire('Deleted!', 'The report has been deleted.', 'success');
+      } catch (error) {
+        console.error('Error deleting report:', error);
+        Swal.fire('Error!', error.message || 'Failed to delete report', 'error');
+      }
+    }
+  };
+
+  const renderReports = () => (
+    <div id="admin-reports-section">
+      <h2>Item Reports</h2>
+      <table id="admin-reports-table">
+        <thead>
+          <tr>
+            <th>Item Name</th>
+            <th>Location Found</th>
+            <th>Drop-off Location</th>
+            <th>Date Found</th>
+            <th>Description</th>
+            <th>Finder Name</th>
+            <th>Contact</th>
+            <th>Image</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {reports.map(report => (
+            <tr key={report._id}>
+              <td>{report.itemName}</td>
+              <td>{report.locationFound}</td>
+              <td>{report.dropOffLocation}</td>
+              <td>{new Date(report.dateFound).toLocaleDateString()}</td>
+              <td>{report.description}</td>
+              <td>{report.finderName}</td>
+              <td>{report.finderContact}</td>
+              <td>
+                {report.image && (
+                  <img 
+                    src={`${API_BASE_URL}/api/uploads/${report.image}`}
+                    alt={report.itemName}
+                    style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                    onClick={() => {
+                      Swal.fire({
+                        title: report.itemName,
+                        imageUrl: `${API_BASE_URL}/api/uploads/${report.image}`,
+                        imageWidth: 400,
+                        imageHeight: 400,
+                        imageAlt: report.itemName
+                      });
+                    }}
+                  />
+                )}
+              </td>
+              <td>
+                <select
+                  value={report.status}
+                  onChange={(e) => handleUpdateReportStatus(report._id, e.target.value)}
+                  className="status-select"
+                >
+                  <option value="pending">Pending</option>
+                  <option value="verified">Verified</option>
+                  <option value="claimed">Claimed</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+              </td>
+              <td>
+                <button 
+                  onClick={() => handleDeleteReport(report._id)}
+                  className="delete-button"
+                >
+                  <FontAwesomeIcon icon={faTrash} /> Delete
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+
   return (
     <div id="admin-main-container">
       <div id="admin-sidebar">
-        {/* <div id="logo" >
-          <img src={/Images/Logo.png} alt="Logo" className="logo" />
-        </div> */}
         <div className="admin-sidebar-item" onClick={() => setSelectedSection('dashboard')}>Dashboard</div>
+        <div className="admin-sidebar-item" onClick={() => setSelectedSection('reports')}>Reports</div>
         <div className="admin-sidebar-item" onClick={() => setSelectedSection('bookings')}>Bookings</div>
         <div className="admin-sidebar-item" onClick={() => setSelectedSection('previewProducts')}>Preview items</div>
         <FontAwesomeIcon
@@ -677,89 +829,87 @@ const Admin = () => {
           style={{ cursor: 'pointer', fontSize: '20px' }}
           onClick={handleLogout}
         />
-
       </div>
       <div id="admin-content">
-      {selectedSection === 'dashboard' && (
-  <div id="admin-dashboard-section">
-    <h2>Dashboard</h2>
-    <div className="dashboard-overview">
-      <div className="dashboard-card">
-        <h3>Items Reported</h3>
-        <p>18</p>
-        <small>5 Recovered</small>
-      </div>
-      <div className="dashboard-card">
-        <h3>Active Search Requests</h3>
-        <p>15</p>
-        <small>3 Pending</small>
-      </div>
-      <div className="dashboard-card">
-        <h3>Weekly Reports</h3>
-        <p>4</p>
-        <small>1 Found</small>
-      </div>
-      <div className="dashboard-card">
-        <h3>System Engagement</h3>
-        <p>80%</p>
-        <small>20% Pending</small>
-      </div>
-    </div>
-    <div className="active-projects">
-      <h3>Active Search Requests</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Item Name</th>
-            <th>Request ID</th>
-            <th>Status</th>
-            <th>Item Image</th>
-            <th>Recovery Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Lost Wallet</td>
-            <td>#2389</td>
-            <td>Recovered</td>
-            <td><img src="https://images.unsplash.com/photo-1593692247595-dc1459e50f35" alt="lost wallet" className="team-avatar" /></td>
-            <td>100%</td>
-          </tr>
-          <tr>
-            <td>Missing Laptop</td>
-            <td>#2401</td>
-            <td>Pending</td>
-            <td><img src="https://images.unsplash.com/photo-1585858224017-635b221234f7" alt="lost laptop" className="team-avatar" /></td>
-            <td>50%</td>
-          </tr>
-          <tr>
-            <td>Found Phone</td>
-            <td>#2412</td>
-            <td>Recovered</td>
-            <td><img src="https://images.unsplash.com/photo-1522748962058-d0241b01d56c" alt="found phone" className="team-avatar" /></td>
-            <td>100%</td>
-          </tr>
-          <tr>
-            <td>Lost Jacket</td>
-            <td>#2447</td>
-            <td>Pending</td>
-            <td><img src="https://images.unsplash.com/photo-1565736607-df10a8ed5050" alt="lost jacket" className="team-avatar" /></td>
-            <td>20%</td>
-          </tr>
-          <tr>
-            <td>Found Backpack</td>
-            <td>#2489</td>
-            <td>Recovered</td>
-            <td><img src="https://images.unsplash.com/photo-1586000073907-8f389d522c7e" alt="found backpack" className="team-avatar" /></td>
-            <td>100%</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-)}
-
-
+        {selectedSection === 'dashboard' && (
+          <div id="admin-dashboard-section">
+            <h2>Dashboard</h2>
+            <div className="dashboard-overview">
+              <div className="dashboard-card">
+                <h3>Items Reported</h3>
+                <p>18</p>
+                <small>5 Recovered</small>
+              </div>
+              <div className="dashboard-card">
+                <h3>Active Search Requests</h3>
+                <p>15</p>
+                <small>3 Pending</small>
+              </div>
+              <div className="dashboard-card">
+                <h3>Weekly Reports</h3>
+                <p>4</p>
+                <small>1 Found</small>
+              </div>
+              <div className="dashboard-card">
+                <h3>System Engagement</h3>
+                <p>80%</p>
+                <small>20% Pending</small>
+              </div>
+            </div>
+            <div className="active-projects">
+              <h3>Active Search Requests</h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Item Name</th>
+                    <th>Request ID</th>
+                    <th>Status</th>
+                    <th>Item Image</th>
+                    <th>Recovery Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Lost Wallet</td>
+                    <td>#2389</td>
+                    <td>Recovered</td>
+                    <td><img src="https://images.unsplash.com/photo-1593692247595-dc1459e50f35" alt="lost wallet" className="team-avatar" /></td>
+                    <td>100%</td>
+                  </tr>
+                  <tr>
+                    <td>Missing Laptop</td>
+                    <td>#2401</td>
+                    <td>Pending</td>
+                    <td><img src="https://images.unsplash.com/photo-1585858224017-635b221234f7" alt="lost laptop" className="team-avatar" /></td>
+                    <td>50%</td>
+                  </tr>
+                  <tr>
+                    <td>Found Phone</td>
+                    <td>#2412</td>
+                    <td>Recovered</td>
+                    <td><img src="https://images.unsplash.com/photo-1522748962058-d0241b01d56c" alt="found phone" className="team-avatar" /></td>
+                    <td>100%</td>
+                  </tr>
+                  <tr>
+                    <td>Lost Jacket</td>
+                    <td>#2447</td>
+                    <td>Pending</td>
+                    <td><img src="https://images.unsplash.com/photo-1565736607-df10a8ed5050" alt="lost jacket" className="team-avatar" /></td>
+                    <td>20%</td>
+                  </tr>
+                  <tr>
+                    <td>Found Backpack</td>
+                    <td>#2489</td>
+                    <td>Recovered</td>
+                    <td><img src="https://images.unsplash.com/photo-1586000073907-8f389d522c7e" alt="found backpack" className="team-avatar" /></td>
+                    <td>100%</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+        {selectedSection === 'reports' && renderReports()}
         {selectedSection === 'bookings' && (
           <div id="admin-bookings-section">
             <h2>Bookings</h2>

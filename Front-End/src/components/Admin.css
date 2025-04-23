@@ -778,6 +778,77 @@ select {
   color: #333333;
 }
 
+/* Reports Section */
+#admin-reports-section {
+  padding: 20px;
+  overflow-x: auto;
+}
+
+#admin-reports-section h2 {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+#admin-reports-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+#admin-reports-table th,
+#admin-reports-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+#admin-reports-table th {
+  background-color: #f5f5f5;
+  font-weight: 600;
+  color: #333;
+}
+
+#admin-reports-table tr:hover {
+  background-color: #f9f9f9;
+}
+
+#admin-reports-table img {
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+#admin-reports-table img:hover {
+  transform: scale(1.1);
+}
+
+#admin-reports-table .status-select {
+  padding: 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  cursor: pointer;
+}
+
+#admin-reports-table .status-select option {
+  padding: 4px;
+}
+
+#admin-reports-table .delete-button {
+  padding: 6px 12px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+#admin-reports-table .delete-button:hover {
+  background-color: #c82333;
+}
+
 @media screen and (max-width: 768px) {
   #admin-main-container {
     flex-direction: column;
@@ -865,4 +936,3 @@ select {
     min-width: 45%;
   }
 }
-
