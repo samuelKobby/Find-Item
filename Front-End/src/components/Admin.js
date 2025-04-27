@@ -304,14 +304,16 @@ const Admin = () => {
 
     const headers = {
       'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
+      'Accept': 'application/json',
+      'Origin': window.location.origin
     };
 
     try {
       // Fetch products
       const productsResponse = await fetch(`${API_BASE_URL}/api/products`, { 
         headers,
-        credentials: 'include'
+        credentials: 'include',
+        mode: 'cors'
       });
       if (!productsResponse.ok) {
         if (productsResponse.status === 401) {
@@ -340,7 +342,8 @@ const Admin = () => {
       // Fetch bookings
       const bookingsResponse = await fetch(`${API_BASE_URL}/api/bookings`, { 
         headers,
-        credentials: 'include'
+        credentials: 'include',
+        mode: 'cors'
       });
       if (!bookingsResponse.ok) {
         if (bookingsResponse.status === 401) {
@@ -354,9 +357,10 @@ const Admin = () => {
       setBookings(bookingsData);
 
       // Fetch reports
-      const reportsResponse = await fetch(`${API_BASE_URL}/api/reports`, {
+      const reportsResponse = await fetch(`https://find-item.vercel.app/api/reports`, {
         headers,
-        credentials: 'include'
+        credentials: 'include',
+        mode: 'cors'
       });
       if (!reportsResponse.ok) {
         if (reportsResponse.status === 401) {
