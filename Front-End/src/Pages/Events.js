@@ -53,23 +53,17 @@ const Events = () => {
     setIsSubmitting(true);
     
     try {
-      const formDataToSend = new FormData();
-      Object.keys(formData).forEach(key => {
-        if (key === 'image' && formData[key]) {
-          formDataToSend.append('image', formData[key]);
-        } else {
-          formDataToSend.append(key, formData[key]);
-        }
-      });
+      // Convert form data to JSON, handling the image separately
+      const reportData = { ...formData };
+      delete reportData.image; // Remove image from JSON data
 
       const response = await fetch(`${API_BASE_URL}/api/reports`, {
         method: 'POST',
-        body: formDataToSend,
-        credentials: 'include',
         headers: {
-          'Accept': 'application/json',
-          'Origin': window.location.origin
-        }
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(reportData)
       });
 
       if (!response.ok) {
