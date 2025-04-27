@@ -15,10 +15,10 @@ const Events = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [formData, setFormData] = useState({
-    name: '',
-    location: '',
+    itemName: '',
+    locationFound: '',
     dropOffLocation: '',  
-    date: '',
+    dateFound: '',
     description: '',
     finderName: '',
     finderContact: '',
@@ -90,10 +90,10 @@ const Events = () => {
       });
       
       setFormData({
-        name: '',
-        location: '',
+        itemName: '',
+        locationFound: '',
         dropOffLocation: 'security_office',
-        date: '',
+        dateFound: '',
         description: '',
         finderName: '',
         finderContact: '',
@@ -133,12 +133,12 @@ const Events = () => {
         
         <form onSubmit={handleSubmit} className="report-form">
           <div className="form-group">
-            <label htmlFor="name">Item Name*</label>
+            <label htmlFor="itemName">Item Name*</label>
             <input
               type="text"
-              id="name"
-              name="name"
-              value={formData.name}
+              id="itemName"
+              name="itemName"
+              value={formData.itemName}
               onChange={handleInputChange}
               required
               placeholder="What item did you find?"
@@ -148,12 +148,12 @@ const Events = () => {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px' }}>
             <div className="form-group">
-              <label htmlFor="location">Where did you find it?*</label>
+              <label htmlFor="locationFound">Where did you find it?*</label>
               <input
                 type="text"
-                id="location"
-                name="location"
-                value={formData.location}
+                id="locationFound"
+                name="locationFound"
+                value={formData.locationFound}
                 onChange={handleInputChange}
                 required
                 placeholder="Where did you find the item?"
@@ -162,12 +162,12 @@ const Events = () => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="date">Date Found*</label>
+              <label htmlFor="dateFound">Date Found*</label>
               <input
                 type="date"
-                id="date"
-                name="date"
-                value={formData.date}
+                id="dateFound"
+                name="dateFound"
+                value={formData.dateFound}
                 onChange={handleInputChange}
                 required
                 disabled={isSubmitting}
