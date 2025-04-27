@@ -54,8 +54,16 @@ const Events = () => {
     
     try {
       // Convert form data to JSON, handling the image separately
-      const reportData = { ...formData };
+      const reportData = { 
+        ...formData,
+        // Add the fields with the names the backend expects
+        location: formData.locationFound,
+        date: formData.dateFound,
+        name: formData.itemName
+      };
       delete reportData.image; // Remove image from JSON data
+
+      console.log('Sending report data:', reportData);
 
       const response = await fetch(`${API_BASE_URL}/api/reports`, {
         method: 'POST',
