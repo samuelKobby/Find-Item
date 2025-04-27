@@ -8,6 +8,10 @@ body {
 .product-main {
   padding-bottom: 10px;
   text-align: center;
+  min-height: 100vh;
+  background-color: var(--bg-color);
+  transition: background-color 0.3s ease;
+  background-image: linear-gradient(to bottom, white, #f3e8ff, white);
 }
 
 .product-head h1 {
@@ -181,6 +185,9 @@ body {
   margin-top: 10px;
 }
 
+.dark-mode .product-main {
+  background-image: none;
+}
 
 @keyframes slide-in {
   from {

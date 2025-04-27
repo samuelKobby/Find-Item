@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import '../Styles/Events.css';
 import { useTheme } from '../context/ThemeContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUpload, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { faUpload, faSpinner, faCamera } from '@fortawesome/free-solid-svg-icons';
 import gadgetsImage from '../Images/gadgets.jpg';
 import accessoriesImage from '../Images/Accessories.jpg';
 import booksImage from '../Images/Books.jpg';
@@ -119,15 +119,24 @@ const Events = () => {
   };
 
   return (
-    <div className={`events-page ${darkMode ? 'dark-mode' : ''}`}>
-      <div className="hero-section">
-        <div className="hero-content">
+    <div className={`report-container ${darkMode ? 'dark-mode' : ''}`}>
+      <div className="report-header" style={{
+        backgroundImage: `url(${gadgetsImage})`
+      }}>
+        <div className="content">
           <h1>Report Found Items</h1>
-          <p>Help us return lost items to their rightful owners by reporting items you've found.</p>
+          <p className="description">
+            Help reunite lost items with their owners.<br />
+            Fill out the form below to report an item you've found on campus.
+          </p>
         </div>
       </div>
 
       <div className="report-form-section">
+        <h2 style={{ marginBottom: '24px', color: darkMode ? '#e5e7eb' : '#374151', fontSize: '1.5rem', fontWeight: '600' }}>
+          Item Information
+        </h2>
+        
         <form onSubmit={handleSubmit} className="report-form">
           <div className="form-group">
             <label htmlFor="itemName">Item Name*</label>
@@ -138,110 +147,135 @@ const Events = () => {
               value={formData.itemName}
               onChange={handleInputChange}
               required
+              placeholder="What item did you find?"
+              disabled={isSubmitting}
             />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="locationFound">Location Found*</label>
-            <input
-              type="text"
-              id="locationFound"
-              name="locationFound"
-              value={formData.locationFound}
-              onChange={handleInputChange}
-              required
-            />
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px' }}>
+            <div className="form-group">
+              <label htmlFor="locationFound">Where did you find it?*</label>
+              <input
+                type="text"
+                id="locationFound"
+                name="locationFound"
+                value={formData.locationFound}
+                onChange={handleInputChange}
+                required
+                placeholder="Where did you find the item?"
+                disabled={isSubmitting}
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="dateFound">Date Found*</label>
+              <input
+                type="date"
+                id="dateFound"
+                name="dateFound"
+                value={formData.dateFound}
+                onChange={handleInputChange}
+                required
+                disabled={isSubmitting}
+              />
+            </div>
           </div>
 
           <div className="form-group">
-            <label htmlFor="dropOffLocation">Drop-off Location*</label>
+            <label htmlFor="dropOffLocation">Where did/will you leave the item?*</label>
             <select
               id="dropOffLocation"
               name="dropOffLocation"
               value={formData.dropOffLocation}
               onChange={handleInputChange}
               required
+              disabled={isSubmitting}
             >
-              <option value="security_office">Security Office</option>
-              <option value="library">Library</option>
-              <option value="info_desk">Information Desk</option>
-              <option value="student_center">Student Center</option>
+              <option value="">Select a drop-off location</option>
+              <option value="security_office">Main Entrance Security Post</option>
+              <option value="library">Balme Library Security Post</option>
+              <option value="info_desk">Business School Security Post (Ground Floor)</option>
+              <option value="student_center">SRC Office</option>
             </select>
           </div>
 
           <div className="form-group">
-            <label htmlFor="dateFound">Date Found*</label>
-            <input
-              type="date"
-              id="dateFound"
-              name="dateFound"
-              value={formData.dateFound}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="description">Description*</label>
+            <label htmlFor="description">Description</label>
             <textarea
               id="description"
               name="description"
               value={formData.description}
               onChange={handleInputChange}
               required
-            ></textarea>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="finderName">Your Name*</label>
-            <input
-              type="text"
-              id="finderName"
-              name="finderName"
-              value={formData.finderName}
-              onChange={handleInputChange}
-              required
+              placeholder="Please provide detailed description of the item..."
+              rows="4"
+              disabled={isSubmitting}
             />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="finderContact">Your Contact*</label>
-            <input
-              type="text"
-              id="finderContact"
-              name="finderContact"
-              value={formData.finderContact}
-              onChange={handleInputChange}
-              required
-            />
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px', marginTop: '12px' }}>
+            <div className="form-group">
+              <label htmlFor="finderName">Your Name*</label>
+              <input
+                type="text"
+                id="finderName"
+                name="finderName"
+                value={formData.finderName}
+                onChange={handleInputChange}
+                required
+                placeholder="Your full name"
+                disabled={isSubmitting}
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="finderContact">Contact *</label>
+              <input
+                type="text"
+                id="finderContact"
+                name="finderContact"
+                value={formData.finderContact}
+                onChange={handleInputChange}
+                required
+                placeholder="Your email or phone number"
+                disabled={isSubmitting}
+              />
+            </div>
           </div>
 
           <div className="form-group">
-            <label htmlFor="image">Image</label>
-            <div className="file-input-wrapper">
+            <label htmlFor="image">Upload Image</label>
+            <div className="image-upload-container">
               <input
                 type="file"
                 id="image"
                 name="image"
-                accept="image/*"
                 onChange={handleImageChange}
-                className="file-input"
+                accept="image/*"
+                className="image-input"
+                disabled={isSubmitting}
               />
-              <div className="file-input-button">
-                <FontAwesomeIcon icon={faUpload} /> Choose Image
-              </div>
+              <label htmlFor="image" className="image-upload-label">
+                <FontAwesomeIcon icon={faCamera} />
+                <span>Choose Image</span>
+              </label>
+              {previewUrl && (
+                <div className="image-preview">
+                  <img src={previewUrl} alt="Preview" />
+                </div>
+              )}
             </div>
-            {previewUrl && (
-              <div className="image-preview">
-                <img src={previewUrl} alt="Preview" />
-              </div>
-            )}
           </div>
 
-          <button type="submit" className="submit-button" disabled={isSubmitting}>
+          <button 
+            type="submit" 
+            className="submit-button"
+            disabled={isSubmitting}
+          >
             {isSubmitting ? (
               <>
-                <FontAwesomeIcon icon={faSpinner} spin /> Submitting...
+                <FontAwesomeIcon icon={faSpinner} spin />
+                <span>Submitting...</span>
               </>
             ) : (
               'Submit Report'

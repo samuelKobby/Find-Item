@@ -13,7 +13,7 @@ body {
   background-position: center;
   padding: 25px;
   position: relative;
-  background-color: var(--bg-color);
+  /* Remove background-color to allow the gradient to show through */
 }
 
 #homepage {

@@ -4,37 +4,288 @@ import './Admin.css';
 import '../Styles/typography.css';
 import defaultproductImage from '../Images/bo4.png';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faTrash, faSignOutAlt, faArrowUp } from '@fortawesome/free-solid-svg-icons';
+import { 
+  faEdit, 
+  faTrash, 
+  faSignOutAlt, 
+  faArrowUp, 
+  faTachometerAlt, 
+  faBoxes, 
+  faCalendarAlt, 
+  faExclamationTriangle, 
+  faUsers, 
+  faChartBar, 
+  faClock,
+  faPlus
+} from '@fortawesome/free-solid-svg-icons';
 import { FaPlus } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import { API_BASE_URL, UPLOADS_URL } from '../config/api';
 import { getAuthToken, logout } from '../utils/auth';
+import { 
+  Chart as ChartJS, 
+  ArcElement, 
+  Tooltip, 
+  Legend, 
+  CategoryScale, 
+  LinearScale, 
+  BarElement, 
+  Title,
+  PointElement,
+  LineElement,
+  RadialLinearScale,
+  Filler
+} from 'chart.js';
+import { Pie, Bar, Line, Doughnut, PolarArea } from 'react-chartjs-2';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+
+// Register Chart.js components
+ChartJS.register(
+  ArcElement, 
+  Tooltip, 
+  Legend, 
+  CategoryScale, 
+  LinearScale, 
+  BarElement, 
+  Title,
+  PointElement,
+  LineElement,
+  RadialLinearScale,
+  Filler,
+  ChartDataLabels
+);
 
 const Admin = () => {
   const navigate = useNavigate();
   const [selectedSection, setSelectedSection] = useState('dashboard');
   const [products, setProducts] = useState([]);
   const [bookings, setBookings] = useState([]);
-  const [reports, setReports] = useState([]);
+  const [reports, setReports] = useState([]); // Ensure reports is always an array
   const [editingProduct, setEditingProduct] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
-  const fileInputRef = useRef(null);
   const [showAddProductForm, setShowAddProductForm] = useState(false);
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
   const [newProduct, setNewProduct] = useState({
     name: '',
     category: '',
-    image: null,
-    imagePreview: ''
+    description: '',
+    image: null
   });
-  const [showScrollTop, setShowScrollTop] = useState(false);
-  const [error, setError] = useState('');
+  const fileInputRef = useRef(null);
+  const [previewImage, setPreviewImage] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Chart data preparation functions
+  const prepareCategoryChartData = () => {
+    const categories = {};
+    
+    // Count products by category
+    products.forEach(product => {
+      const category = product.category || 'Uncategorized';
+      categories[category] = (categories[category] || 0) + 1;
+    });
+    
+    // Prepare data for chart
+    return {
+      labels: Object.keys(categories),
+      datasets: [
+        {
+          data: Object.values(categories),
+          backgroundColor: [
+            'rgba(99, 102, 241, 0.8)',
+            'rgba(139, 92, 246, 0.8)',
+            'rgba(168, 85, 247, 0.8)',
+            'rgba(217, 70, 239, 0.8)',
+            'rgba(236, 72, 153, 0.8)',
+            'rgba(244, 114, 182, 0.8)'
+          ],
+          borderColor: [
+            'rgba(99, 102, 241, 1)',
+            'rgba(139, 92, 246, 1)',
+            'rgba(168, 85, 247, 1)',
+            'rgba(217, 70, 239, 1)',
+            'rgba(236, 72, 153, 1)',
+            'rgba(244, 114, 182, 1)'
+          ],
+          borderWidth: 1,
+          hoverOffset: 15
+        }
+      ]
+    };
+  };
+
+  const prepareBookingTrendsData = () => {
+    // Create a map of the last 6 months
+    const last6Months = [];
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const today = new Date();
+    
+    for (let i = 5; i >= 0; i--) {
+      const month = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      last6Months.push({
+        month: month.getMonth(),
+        year: month.getFullYear(),
+        label: `${monthNames[month.getMonth()]} ${month.getFullYear()}`,
+        count: 0
+      });
+    }
+    
+    // Count bookings by month
+    bookings.forEach(booking => {
+      const bookingDate = new Date(booking.date);
+      const bookingMonth = bookingDate.getMonth();
+      const bookingYear = bookingDate.getFullYear();
+      
+      const monthIndex = last6Months.findIndex(m => m.month === bookingMonth && m.year === bookingYear);
+      if (monthIndex !== -1) {
+        last6Months[monthIndex].count++;
+      }
+    });
+    
+    return {
+      labels: last6Months.map(m => m.label),
+      datasets: [
+        {
+          label: 'Bookings',
+          data: last6Months.map(m => m.count),
+          backgroundColor: 'rgba(99, 102, 241, 0.2)',
+          borderColor: 'rgba(99, 102, 241, 1)',
+          borderWidth: 2,
+          tension: 0.4,
+          fill: true,
+          pointBackgroundColor: 'rgba(99, 102, 241, 1)',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 5,
+          pointHoverRadius: 7
+        }
+      ]
+    };
+  };
+
+  const prepareReportStatusData = () => {
+    const statuses = {
+      'Pending': 0,
+      'In Progress': 0,
+      'Resolved': 0,
+      'Closed': 0
+    };
+    
+    // Count reports by status
+    if (Array.isArray(reports)) {
+      reports.forEach(report => {
+        const status = report.status || 'Pending';
+        if (statuses.hasOwnProperty(status)) {
+          statuses[status]++;
+        } else {
+          statuses['Pending']++;
+        }
+      });
+    }
+    
+    return {
+      labels: Object.keys(statuses),
+      datasets: [
+        {
+          data: Object.values(statuses),
+          backgroundColor: [
+            'rgba(245, 158, 11, 0.8)',
+            'rgba(59, 130, 246, 0.8)',
+            'rgba(16, 185, 129, 0.8)',
+            'rgba(107, 114, 128, 0.8)'
+          ],
+          borderColor: [
+            'rgba(245, 158, 11, 1)',
+            'rgba(59, 130, 246, 1)',
+            'rgba(16, 185, 129, 1)',
+            'rgba(107, 114, 128, 1)'
+          ],
+          borderWidth: 1
+        }
+      ]
+    };
+  };
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          font: {
+            size: 12,
+            family: "'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif"
+          },
+          padding: 20
+        }
+      },
+      datalabels: {
+        color: '#fff',
+        font: {
+          weight: 'bold',
+          size: 12
+        },
+        formatter: (value, ctx) => {
+          if (value === 0) return '';
+          const total = ctx.dataset.data.reduce((acc, data) => acc + data, 0);
+          const percentage = (value * 100 / total).toFixed(1) + '%';
+          return percentage;
+        }
+      },
+      tooltip: {
+        enabled: true,
+        callbacks: {
+          label: function(context) {
+            const label = context.label || '';
+            const value = context.raw || 0;
+            return `${label}: ${value}`;
+          }
+        }
+      }
+    },
+    animation: {
+      animateScale: true,
+      animateRotate: true,
+      duration: 2000,
+      easing: 'easeOutQuart'
+    }
+  };
+
+  const lineChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+      datalabels: {
+        display: false
+      },
+      tooltip: {
+        enabled: true
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          precision: 0
+        }
+      }
+    },
+    animation: {
+      duration: 2000,
+      easing: 'easeOutQuart'
+    }
+  };
 
   const categories = ['ID Card', 'Accessory', 'Others']
 
   useEffect(() => {
     const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 300);
+      setShowScrollToTop(window.scrollY > 300);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -618,66 +869,255 @@ const Admin = () => {
     </div>
   );
 
-  const renderProducts = () => (
-    <div className="admin-products">
-      <div className="admin-header">
-        <div className="filter-and-search">
-          <select
-            value={filterCategory}
-            onChange={handleFilterChange}
-            className="filter-select"
-          >
-            <option value="">All Categories</option>
-            {categories.map((cat) => (
-              <option key={cat} value={cat}>{cat}</option>
-            ))}
-          </select>
-          <input
-            type="text"
-            placeholder="Search items..."
-            value={searchTerm}
-            onChange={handleSearchChange}
-            className="search-input"
-          />
-         
+  const renderProducts = () => {
+    return (
+      <>
+        <div id="admin-header">
+          <h1 id="admin-title">Items Management</h1>
+          
+          <button className="admin-logout-button" onClick={handleLogout}>
+            <FontAwesomeIcon icon={faSignOutAlt} className="admin-logout-icon" />
+            Logout
+          </button>
         </div>
-        <button className="add-product-button" onClick={() => setShowAddProductForm(true)}>
-          <FaPlus /> Add Item
-        </button>
-      </div>
-
-      <div className="products-grid">
-        {filteredProducts.map((product) => (
-          <div key={product._id} className="product-card">
-              <div className="product-image">
-                <img
-                  src={product.image || '/placeholder-image.png'}
-                  alt={product.name}
-                  onError={(e) => {
-                    console.error('Image load error for:', product.name);
-                    e.target.src = 'https://via.placeholder.com/150?text=No+Image';
-                  }}
-                
-                />
-              </div>
-              <div className="product-details">
-                <h3>{product.name}</h3>
-                <p>Category: {product.category}</p>
-              </div>
-            <div className="product-actions">
-              <button onClick={() => handleEditProduct(product)} className="edit-button">
-                <FontAwesomeIcon icon={faEdit} /> Edit
-              </button>
-              <button onClick={() => handleDeleteProduct(product._id)} className="delete-button">
-                <FontAwesomeIcon icon={faTrash} /> Delete
-              </button>
-              
-            </div>
+        
+        <div className="admin-card">
+          <div className="admin-card-header">
+            <h2 className="admin-card-title">
+              <FontAwesomeIcon icon={faBoxes} className="admin-card-title-icon" />
+              Items Management
+            </h2>
+            <button className="admin-add-button" onClick={() => setShowAddProductForm(true)}>
+              <FaPlus className="admin-add-icon" />
+              Add New Item
+            </button>
           </div>
-        ))}
-      </div>
-    </div>
-  );
+
+          <div className="admin-search-filter">
+            <input
+              type="text"
+              placeholder="Search items..."
+              className="admin-search-input"
+              value={searchTerm}
+              onChange={handleSearchChange}
+            />
+            <select
+              className="admin-filter-select"
+              value={filterCategory}
+              onChange={handleFilterChange}
+            >
+              <option value="">All Categories</option>
+              {categories.map((cat) => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+          </div>
+
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>Image</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredProducts.length > 0 ? (
+                filteredProducts.map((product) => (
+                  <tr key={product._id}>
+                    <td>
+                      <img
+                        src={product.image || defaultproductImage}
+                        alt={product.name}
+                        style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '4px' }}
+                        onError={(e) => {
+                          e.target.src = defaultproductImage;
+                        }}
+                      />
+                    </td>
+                    <td>{product.name}</td>
+                    <td>{product.category}</td>
+                    <td>
+                      <div className="admin-table-actions">
+                        <button
+                          className="admin-action-button edit"
+                          onClick={() => handleEditProduct(product)}
+                        >
+                          <FontAwesomeIcon icon={faEdit} />
+                        </button>
+                        <button
+                          className="admin-action-button delete"
+                          onClick={() => handleDeleteProduct(product._id)}
+                        >
+                          <FontAwesomeIcon icon={faTrash} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="4" style={{ textAlign: 'center' }}>No items found</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </>
+    );
+  };
+
+  const renderReports = () => {
+    return (
+      <>
+        <div id="admin-header">
+          <h1 id="admin-title">Reports Management</h1>
+          
+          <button className="admin-logout-button" onClick={handleLogout}>
+            <FontAwesomeIcon icon={faSignOutAlt} className="admin-logout-icon" />
+            Logout
+          </button>
+        </div>
+        
+        <div className="admin-card">
+          <div className="admin-card-header">
+            <h2 className="admin-card-title">
+              <FontAwesomeIcon icon={faExclamationTriangle} className="admin-card-title-icon" />
+              Reports Management
+            </h2>
+          </div>
+
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Reporter</th>
+                <th>Contact</th>
+                <th>Description</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Array.isArray(reports) && reports.length > 0 ? (
+                reports.map((report) => (
+                  <tr key={report._id}>
+                    <td>{report.itemName}</td>
+                    <td>{report.reporterName}</td>
+                    <td>{report.contactInfo}</td>
+                    <td>{report.description}</td>
+                    <td>
+                      <div className={`status-badge ${report.status?.toLowerCase() || 'pending'}`}>
+                        {report.status || 'Pending'}
+                      </div>
+                    </td>
+                    <td>
+                      <div className="admin-table-actions">
+                        <select
+                          value={report.status || 'Pending'}
+                          onChange={(e) => handleUpdateReportStatus(report._id, e.target.value)}
+                          className="admin-filter-select"
+                          style={{ marginRight: '8px' }}
+                        >
+                          <option value="Pending">Pending</option>
+                          <option value="In Progress">In Progress</option>
+                          <option value="Resolved">Resolved</option>
+                          <option value="Rejected">Rejected</option>
+                        </select>
+                        <button
+                          className="admin-action-button delete"
+                          onClick={() => handleDeleteReport(report._id)}
+                        >
+                          <FontAwesomeIcon icon={faTrash} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6" style={{ textAlign: 'center' }}>No reports found</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </>
+    );
+  };
+
+  const renderBookings = () => {
+    return (
+      <>
+        <div id="admin-header">
+          <h1 id="admin-title">Bookings Management</h1>
+          
+          <button className="admin-logout-button" onClick={handleLogout}>
+            <FontAwesomeIcon icon={faSignOutAlt} className="admin-logout-icon" />
+            Logout
+          </button>
+        </div>
+        
+        <div className="admin-card">
+          <div className="admin-card-header">
+            <h2 className="admin-card-title">
+              <FontAwesomeIcon icon={faCalendarAlt} className="admin-card-title-icon" />
+              Bookings Management
+            </h2>
+          </div>
+          
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Location</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {bookings.length > 0 ? (
+                bookings.map(booking => (
+                  <tr key={booking._id || booking.id}>
+                    <td>{booking.customerName}</td>
+                    <td>{booking.contact1}</td>
+                    <td>{booking.email}</td>
+                    <td>{new Date(booking.eventDate).toLocaleDateString()}</td>
+                    <td>{booking.eventTime}</td>
+                    <td>{booking.eventLocation}</td>
+                    <td>
+                      <div className="status-badge pending">
+                        Pending
+                      </div>
+                    </td>
+                    <td>
+                      <div className="admin-table-actions">
+                        <button
+                          className="admin-action-button delete"
+                          onClick={() => handleDeleteBooking(booking._id || booking.id)}
+                        >
+                          <FontAwesomeIcon icon={faTrash} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="8" style={{ textAlign: 'center' }}>No bookings found</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </>
+    );
+  };
 
   const handleUpdateReportStatus = async (reportId, newStatus) => {
     try {
@@ -743,238 +1183,227 @@ const Admin = () => {
     }
   };
 
-  const renderReports = () => (
-    <div id="admin-reports-section">
-      <h2>Item Reports</h2>
-      <table id="admin-reports-table">
-        <thead>
-          <tr>
-            <th>Item Name</th>
-            <th>Location Found</th>
-            <th>Drop-off Location</th>
-            <th>Date Found</th>
-            <th>Description</th>
-            <th>Finder Name</th>
-            <th>Contact</th>
-            <th>Image</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {reports.map(report => (
-            <tr key={report._id}>
-              <td>{report.itemName}</td>
-              <td>{report.locationFound}</td>
-              <td>{report.dropOffLocation}</td>
-              <td>{new Date(report.dateFound).toLocaleDateString()}</td>
-              <td>{report.description}</td>
-              <td>{report.finderName}</td>
-              <td>{report.finderContact}</td>
-              <td>
-                {report.image && (
-                  <img 
-                    src={`${API_BASE_URL}/api/uploads/${report.image}`}
-                    alt={report.itemName}
-                    style={{ width: '50px', height: '50px', objectFit: 'cover' }}
-                    onClick={() => {
-                      Swal.fire({
-                        title: report.itemName,
-                        imageUrl: `${API_BASE_URL}/api/uploads/${report.image}`,
-                        imageWidth: 400,
-                        imageHeight: 400,
-                        imageAlt: report.itemName
-                      });
-                    }}
-                  />
-                )}
-              </td>
-              <td>
-                <select
-                  value={report.status}
-                  onChange={(e) => handleUpdateReportStatus(report._id, e.target.value)}
-                  className="status-select"
-                >
-                  <option value="pending">Pending</option>
-                  <option value="verified">Verified</option>
-                  <option value="claimed">Claimed</option>
-                  <option value="rejected">Rejected</option>
-                </select>
-              </td>
-              <td>
-                <button 
-                  onClick={() => handleDeleteReport(report._id)}
-                  className="delete-button"
-                >
-                  <FontAwesomeIcon icon={faTrash} /> Delete
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
+  const renderDashboard = () => {
+    return (
+      <>
+        <div id="admin-header">
+          <h1 id="admin-title">Dashboard</h1>
+          
+          <button className="admin-logout-button" onClick={handleLogout}>
+            <FontAwesomeIcon icon={faSignOutAlt} className="admin-logout-icon" />
+            Logout
+          </button>
+        </div>
+
+        <div className="admin-stats-grid">
+          <div className="admin-stat-card">
+            <div className="admin-stat-icon primary">
+              <FontAwesomeIcon icon={faBoxes} />
+            </div>
+            <div className="admin-stat-content">
+              <div className="admin-stat-label">Total Items</div>
+              <div className="admin-stat-value">{products.length}</div>
+            </div>
+          </div>
+          
+          <div className="admin-stat-card">
+            <div className="admin-stat-icon success">
+              <FontAwesomeIcon icon={faUsers} />
+            </div>
+            <div className="admin-stat-content">
+              <div className="admin-stat-label">Bookings</div>
+              <div className="admin-stat-value">{bookings.length}</div>
+            </div>
+          </div>
+          
+          <div className="admin-stat-card">
+            <div className="admin-stat-icon warning">
+              <FontAwesomeIcon icon={faExclamationTriangle} />
+            </div>
+            <div className="admin-stat-content">
+              <div className="admin-stat-label">Pending Reports</div>
+              <div className="admin-stat-value">
+                {Array.isArray(reports) ? reports.filter(report => report.status === 'Pending').length : 0}
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="admin-dashboard-charts">
+          <div className="admin-chart-container">
+            <h3 className="admin-chart-title">
+              <FontAwesomeIcon icon={faChartBar} className="admin-chart-icon" />
+              Items by Category
+            </h3>
+            <div className="admin-chart">
+              <Doughnut 
+                data={prepareCategoryChartData()} 
+                options={chartOptions}
+              />
+            </div>
+          </div>
+          
+          <div className="admin-chart-container">
+            <h3 className="admin-chart-title">
+              <FontAwesomeIcon icon={faCalendarAlt} className="admin-chart-icon" />
+              Booking Trends
+            </h3>
+            <div className="admin-chart">
+              <Line 
+                data={prepareBookingTrendsData()} 
+                options={lineChartOptions}
+              />
+            </div>
+          </div>
+          
+          <div className="admin-chart-container">
+            <h3 className="admin-chart-title">
+              <FontAwesomeIcon icon={faExclamationTriangle} className="admin-chart-icon" />
+              Report Status
+            </h3>
+            <div className="admin-chart">
+              <PolarArea 
+                data={prepareReportStatusData()} 
+                options={chartOptions}
+              />
+            </div>
+          </div>
+        </div>
+        
+        <div className="admin-card">
+          <div className="admin-card-header">
+            <h2 className="admin-card-title">
+              <FontAwesomeIcon icon={faExclamationTriangle} className="admin-card-title-icon" />
+              System Alerts
+            </h2>
+          </div>
+          
+          <div style={{ padding: '1rem', backgroundColor: 'rgba(245, 158, 11, 0.1)', borderRadius: '0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+              <FontAwesomeIcon icon={faExclamationTriangle} style={{ color: '#F59E0B', marginRight: '0.75rem', marginTop: '0.25rem' }} />
+              <div>
+                <h3 style={{ fontWeight: '500', color: '#92400E', marginBottom: '0.25rem' }}>New Reports</h3>
+                <p style={{ color: '#92400E' }}>You have {Array.isArray(reports) ? reports.filter(report => report.status === 'Pending').length : 0} pending reports to review</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="admin-card">
+          <div className="admin-card-header">
+            <h2 className="admin-card-title">
+              <FontAwesomeIcon icon={faBoxes} className="admin-card-title-icon" />
+              Recently Added Items
+            </h2>
+          </div>
+          
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>Image</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {products.slice(0, 5).map((product) => (
+                <tr key={product._id}>
+                  <td>
+                    <img
+                      src={product.image || defaultproductImage}
+                      alt={product.name}
+                      style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }}
+                      onError={(e) => {
+                        e.target.src = defaultproductImage;
+                      }}
+                    />
+                  </td>
+                  <td>{product.name}</td>
+                  <td>{product.category}</td>
+                  <td>
+                    <div className="admin-table-actions">
+                      <button
+                        className="admin-action-button edit"
+                        onClick={() => handleEditProduct(product)}
+                      >
+                        <FontAwesomeIcon icon={faEdit} />
+                      </button>
+                      <button
+                        className="admin-action-button delete"
+                        onClick={() => handleDeleteProduct(product._id)}
+                      >
+                        <FontAwesomeIcon icon={faTrash} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {products.length === 0 && (
+                <tr>
+                  <td colSpan="4" style={{ textAlign: 'center' }}>No items found</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </>
+    );
+  };
 
   return (
     <div id="admin-main-container">
       <div id="admin-sidebar">
-        <div className="admin-sidebar-item" onClick={() => setSelectedSection('dashboard')}>Dashboard</div>
-        <div className="admin-sidebar-item" onClick={() => setSelectedSection('reports')}>Reports</div>
-        <div className="admin-sidebar-item" onClick={() => setSelectedSection('bookings')}>Bookings</div>
-        <div className="admin-sidebar-item" onClick={() => setSelectedSection('previewProducts')}>Preview items</div>
-        <FontAwesomeIcon
-          icon={faSignOutAlt}
-          className="logout-icon"
-          style={{ cursor: 'pointer', fontSize: '20px' }}
-          onClick={handleLogout}
-        />
+        <div id="admin-sidebar-logo">Find Items Admin</div>
+        
+        <div 
+          className={`admin-sidebar-item ${selectedSection === 'dashboard' ? 'active' : ''}`}
+          onClick={() => setSelectedSection('dashboard')}
+        >
+          <FontAwesomeIcon icon={faTachometerAlt} className="admin-sidebar-item-icon" />
+          Dashboard
+        </div>
+        
+        <div 
+          className={`admin-sidebar-item ${selectedSection === 'previewProducts' ? 'active' : ''}`}
+          onClick={() => setSelectedSection('previewProducts')}
+        >
+          <FontAwesomeIcon icon={faBoxes} className="admin-sidebar-item-icon" />
+          Items
+        </div>
+        
+        <div 
+          className={`admin-sidebar-item ${selectedSection === 'bookings' ? 'active' : ''}`}
+          onClick={() => setSelectedSection('bookings')}
+        >
+          <FontAwesomeIcon icon={faCalendarAlt} className="admin-sidebar-item-icon" />
+          Bookings
+        </div>
+        
+        <div 
+          className={`admin-sidebar-item ${selectedSection === 'reports' ? 'active' : ''}`}
+          onClick={() => setSelectedSection('reports')}
+        >
+          <FontAwesomeIcon icon={faExclamationTriangle} className="admin-sidebar-item-icon" />
+          Reports
+        </div>
+        
+        <div className="admin-sidebar-item" onClick={handleLogout}>
+          <FontAwesomeIcon icon={faSignOutAlt} className="admin-sidebar-item-icon" />
+          Logout
+        </div>
       </div>
+      
       <div id="admin-content">
-        {selectedSection === 'dashboard' && (
-          <div id="admin-dashboard-section">
-            <h2>Dashboard</h2>
-            <div className="dashboard-overview">
-              <div className="dashboard-card">
-                <h3>Items Reported</h3>
-                <p>18</p>
-                <small>5 Recovered</small>
-              </div>
-              <div className="dashboard-card">
-                <h3>Active Search Requests</h3>
-                <p>15</p>
-                <small>3 Pending</small>
-              </div>
-              <div className="dashboard-card">
-                <h3>Weekly Reports</h3>
-                <p>4</p>
-                <small>1 Found</small>
-              </div>
-              <div className="dashboard-card">
-                <h3>System Engagement</h3>
-                <p>80%</p>
-                <small>20% Pending</small>
-              </div>
-            </div>
-            <div className="active-projects">
-              <h3>Active Search Requests</h3>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Item Name</th>
-                    <th>Request ID</th>
-                    <th>Status</th>
-                    <th>Item Image</th>
-                    <th>Recovery Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>Lost Wallet</td>
-                    <td>#2389</td>
-                    <td>Recovered</td>
-                    <td><img src="https://images.unsplash.com/photo-1593692247595-dc1459e50f35" alt="lost wallet" className="team-avatar" /></td>
-                    <td>100%</td>
-                  </tr>
-                  <tr>
-                    <td>Missing Laptop</td>
-                    <td>#2401</td>
-                    <td>Pending</td>
-                    <td><img src="https://images.unsplash.com/photo-1585858224017-635b221234f7" alt="lost laptop" className="team-avatar" /></td>
-                    <td>50%</td>
-                  </tr>
-                  <tr>
-                    <td>Found Phone</td>
-                    <td>#2412</td>
-                    <td>Recovered</td>
-                    <td><img src="https://images.unsplash.com/photo-1522748962058-d0241b01d56c" alt="found phone" className="team-avatar" /></td>
-                    <td>100%</td>
-                  </tr>
-                  <tr>
-                    <td>Lost Jacket</td>
-                    <td>#2447</td>
-                    <td>Pending</td>
-                    <td><img src="https://images.unsplash.com/photo-1565736607-df10a8ed5050" alt="lost jacket" className="team-avatar" /></td>
-                    <td>20%</td>
-                  </tr>
-                  <tr>
-                    <td>Found Backpack</td>
-                    <td>#2489</td>
-                    <td>Recovered</td>
-                    <td><img src="https://images.unsplash.com/photo-1586000073907-8f389d522c7e" alt="found backpack" className="team-avatar" /></td>
-                    <td>100%</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
+        {selectedSection === 'dashboard' && renderDashboard()}
         {selectedSection === 'reports' && renderReports()}
-        {selectedSection === 'bookings' && (
-          <div id="admin-bookings-section">
-            <h2>Bookings</h2>
-            <table id="admin-bookings-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Phone</th>
-                  <th>Email</th>
-                  <th>Date</th>
-                  <th>Time</th>
-                  <th>Location</th>
-                  <th>Details</th>
-                  <th>Status</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {bookings.map(booking => (
-                  <tr key={booking.id}>
-                    <td>{booking.customerName}</td>
-                    <td>{booking.contact1}</td>
-                    <td>{booking.email}</td>
-                    <td>{new Date(booking.eventDate).toLocaleDateString()}</td>
-                    <td>{booking.eventTime}</td>
-                    <td>{booking.eventLocation}</td>
-                    <td>{booking.eventDetails}</td>
-                    <td>
-                      <div className="custom-select-container">
-                        <select
-                          className="custom-select"
-                        >
-                          <option value="Pending">Pending</option>
-                          <option value="Accepted">Claimed</option>
-                          <option value="Denied">Deny</option>
-
-                        </select>
-                      </div>
-                    </td>
-                    <td>
-
-                      <td>
-                        <FontAwesomeIcon
-                          icon={faTrash}
-                          onClick={() => handleDeleteBooking(booking._id)}
-                          className="admin-delete-button"
-                          style={{ cursor: 'pointer', fontSize: '20px', marginLeft: '10px' }}
-                        />
-
-                      </td>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-        {selectedSection === 'previewProducts' && (
-          renderProducts()
-        )}
+        {selectedSection === 'bookings' && renderBookings()}
+        {selectedSection === 'previewProducts' && renderProducts()}
       </div>
       {showAddProductForm && renderAddProductModal()}
       {editingProduct && renderEditProductModal()}
       <button 
-        className={`scroll-to-top ${showScrollTop ? 'visible' : ''}`}
+        className={`scroll-to-top ${showScrollToTop ? 'visible' : ''}`}
         onClick={scrollToTop}
         aria-label="Scroll to top"
       >

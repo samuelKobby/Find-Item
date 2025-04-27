@@ -32,7 +32,7 @@ function App() {
   // Component to handle conditional footer rendering
   const AppContent = () => {
     const location = useLocation();
-    const hideFooterPaths = ['/login'];
+    const hideFooterPaths = ['/login', '/admin'];
     const shouldShowFooter = !hideFooterPaths.includes(location.pathname);
 
     return (

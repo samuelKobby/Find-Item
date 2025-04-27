@@ -1,3 +1,14 @@
+.contact-container {
+  min-height: 100vh;
+  background-color: var(--bg-color);
+  transition: background-color 0.3s ease;
+  background-image: linear-gradient(to bottom, white, #f3e8ff, white);
+}
+
+.dark-mode .contact-container {
+  background-image: none;
+}
+
 body, html {
     margin: 0;
     padding: 0;     
@@ -180,4 +191,3 @@ body, html {
       transform: translateX(0);
     }
   }
-  
