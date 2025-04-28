@@ -10,6 +10,15 @@ import othersImage from '../Images/others.jpg';
 import Swal from 'sweetalert2';
 import { API_BASE_URL } from '../config/api';
 
+const convertFileToBase64 = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
+
 const Events = () => {
   const { darkMode } = useTheme();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -36,10 +45,27 @@ const Events = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Validate file type
+      if (!file.type.match('image.*')) {
+        Swal.fire('Error', 'Please select an image file (JPEG, PNG, etc.)', 'error');
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        Swal.fire('Error', 'Image size should not exceed 5MB', 'error');
+        return;
+      }
+      
+      console.log('Image selected:', file.name, file.type, file.size);
+      
+      // Store the file object directly for upload
       setFormData(prevState => ({
         ...prevState,
         image: file
       }));
+      
+      // Create preview URL
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewUrl(reader.result);
@@ -53,19 +79,33 @@ const Events = () => {
     setIsSubmitting(true);
     
     try {
-      // Convert form data to JSON, handling the image separately
-      const reportData = { 
-        ...formData,
-        // Add the fields with the names the backend expects
+      // Create a data object for the report
+      const reportData = {
+        itemName: formData.itemName,
+        locationFound: formData.locationFound,
+        dateFound: formData.dateFound,
+        description: formData.description,
+        finderName: formData.finderName,
+        finderContact: formData.finderContact,
+        dropOffLocation: formData.dropOffLocation,
+        // Add the alternative field names that the backend might expect
+        name: formData.itemName,
         location: formData.locationFound,
-        date: formData.dateFound,
-        name: formData.itemName
+        date: formData.dateFound
       };
-      delete reportData.image; // Remove image from JSON data
+      
+      // If there's an image, convert it to Base64 and add it to the report data
+      if (formData.image && formData.image instanceof File) {
+        // Convert the image to Base64
+        const base64Image = await convertFileToBase64(formData.image);
+        reportData.image = base64Image;
+        reportData.imageUrl = base64Image; // Add both formats to be safe
+        console.log('Image converted to Base64');
+      }
+      
+      console.log('Sending report data with image');
 
-      console.log('Sending report data:', reportData);
-
-      const response = await fetch(`${API_BASE_URL}/api/reports`, {
+      const response = await fetch(`https://find-item.vercel.app/api/reports`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

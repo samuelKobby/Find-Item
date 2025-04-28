@@ -75,6 +75,7 @@ const Admin = () => {
   const fileInputRef = useRef(null);
   const [previewImage, setPreviewImage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [previewImageUrl, setPreviewImageUrl] = useState(null);
 
   // Chart data preparation functions
   const prepareCategoryChartData = () => {
@@ -355,29 +356,75 @@ const Admin = () => {
       }
       const bookingsData = await bookingsResponse.json();
       setBookings(bookingsData);
-
-      // Fetch reports
-      const reportsResponse = await fetch(`https://find-item.vercel.app/api/reports`, {
-        headers,
-        credentials: 'include',
-        mode: 'cors'
-      });
-      if (!reportsResponse.ok) {
-        if (reportsResponse.status === 401) {
-          logout();
-          navigate('/login');
-          return;
-        }
-        throw new Error('Failed to fetch reports');
-      }
-      const reportsData = await reportsResponse.json();
-      setReports(reportsData);
-
     } catch (error) {
       console.error('Error fetching data:', error);
       Swal.fire('Error!', error.message, 'error');
     }
   };
+
+  // Add a separate function to fetch reports
+  const fetchReports = async () => {
+    console.log('Fetching reports independently...');
+    try {
+      const token = getAuthToken();
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+      
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json',
+        'Origin': window.location.origin
+      };
+      
+      const response = await fetch('https://find-item.vercel.app/api/reports', {
+        method: 'GET',
+        headers,
+        credentials: 'include',
+        mode: 'cors'
+      });
+      
+      console.log('Reports fetch status:', response.status);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch reports: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('Reports data fetched independently:', data);
+      
+      if (Array.isArray(data)) {
+        setReports(data);
+      } else if (data && typeof data === 'object' && Array.isArray(data.data)) {
+        // The API returns { success: true, count: X, data: [...] }
+        console.log('Setting reports from data.data:', data.data);
+        
+        // Log image URLs for debugging
+        data.data.forEach(report => {
+          console.log(`Report ${report._id} image:`, report.image);
+        });
+        
+        setReports(data.data);
+      } else if (data && typeof data === 'object' && Array.isArray(data.reports)) {
+        // Some APIs wrap the array in an object with 'reports' key
+        setReports(data.reports);
+      } else {
+        console.error('Unexpected reports data format:', data);
+        setReports([]);
+      }
+    } catch (error) {
+      console.error('Error in fetchReports:', error);
+      setReports([]);
+    }
+  };
+
+  // Call fetchReports when the reports section is selected
+  useEffect(() => {
+    if (selectedSection === 'reports') {
+      fetchReports();
+    }
+  }, [selectedSection]);
 
   const scrollToTop = () => {
     window.scrollTo({
@@ -972,7 +1019,43 @@ const Admin = () => {
     );
   };
 
+  const openImagePreview = (imageUrl) => {
+    setPreviewImageUrl(imageUrl);
+  };
+
+  const closeImagePreview = () => {
+    setPreviewImageUrl(null);
+  };
+
+  const getImageUrl = (report) => {
+    // Check for image field in different possible formats
+    if (!report) return defaultproductImage;
+    
+    // Check for Base64 image data
+    if (report.image && typeof report.image === 'string') {
+      if (report.image.startsWith('data:image')) {
+        return report.image;
+      }
+    }
+    
+    // Check for imageUrl field
+    if (report.imageUrl && typeof report.imageUrl === 'string') {
+      if (report.imageUrl.startsWith('data:image')) {
+        return report.imageUrl;
+      }
+      if (report.imageUrl.startsWith('http')) {
+        return report.imageUrl;
+      }
+      return `${API_BASE_URL}/api/uploads/${report.imageUrl}?t=${Date.now()}`;
+    }
+    
+    // If no valid image found, return default
+    return defaultproductImage;
+  };
+
   const renderReports = () => {
+    console.log('Rendering reports section. Reports data:', reports);
+    
     return (
       <>
         <div id="admin-header">
@@ -991,11 +1074,14 @@ const Admin = () => {
               Reports Management
             </h2>
           </div>
-
+          
           <table className="admin-table">
             <thead>
               <tr>
+                <th>Image</th>
                 <th>Item</th>
+                <th>Location Found</th>
+                <th>Date Found</th>
                 <th>Reporter</th>
                 <th>Contact</th>
                 <th>Description</th>
@@ -1007,9 +1093,22 @@ const Admin = () => {
               {Array.isArray(reports) && reports.length > 0 ? (
                 reports.map((report) => (
                   <tr key={report._id}>
-                    <td>{report.itemName}</td>
-                    <td>{report.reporterName}</td>
-                    <td>{report.contactInfo}</td>
+                    <td>
+                      <img
+                        src={getImageUrl(report)}
+                        alt={report.itemName || report.name}
+                        style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '4px' }}
+                        onClick={() => openImagePreview(getImageUrl(report))}
+                        onError={(e) => {
+                          e.target.src = defaultproductImage;
+                        }}
+                      />
+                    </td>
+                    <td>{report.itemName || report.name}</td>
+                    <td>{report.locationFound || report.location}</td>
+                    <td>{new Date(report.dateFound || report.date).toLocaleDateString()}</td>
+                    <td>{report.finderName}</td>
+                    <td>{report.finderContact}</td>
                     <td>{report.description}</td>
                     <td>
                       <div className={`status-badge ${report.status?.toLowerCase() || 'pending'}`}>
@@ -1028,12 +1127,21 @@ const Admin = () => {
                           <option value="In Progress">In Progress</option>
                           <option value="Resolved">Resolved</option>
                           <option value="Rejected">Rejected</option>
+                          <option value="Processed">Processed</option>
                         </select>
                         <button
                           className="admin-action-button delete"
                           onClick={() => handleDeleteReport(report._id)}
+                          title="Delete Report"
                         >
                           <FontAwesomeIcon icon={faTrash} />
+                        </button>
+                        <button
+                          className="admin-action-button add-to-products"
+                          onClick={() => handleAddReportToProducts(report)}
+                          title="Add to Items"
+                        >
+                          <FontAwesomeIcon icon={faPlus} />
                         </button>
                       </div>
                     </td>
@@ -1041,12 +1149,18 @@ const Admin = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="6" style={{ textAlign: 'center' }}>No reports found</td>
+                  <td colSpan="9" style={{ textAlign: 'center' }}>No reports found</td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
+        {previewImageUrl && (
+          <div className="image-preview-modal">
+            <button className="close-button" onClick={closeImagePreview}>&times;</button>
+            <img src={previewImageUrl} alt="Image Preview" />
+          </div>
+        )}
       </>
     );
   };
@@ -1185,6 +1299,92 @@ const Admin = () => {
         Swal.fire('Error!', error.message || 'Failed to delete report', 'error');
       }
     }
+  };
+
+  const handleAddReportToProducts = (report) => {
+    console.log('Converting report to product:', report);
+    
+    // Create a new product from the report data
+    const newProductData = {
+      name: report.itemName || report.name,
+      description: report.description || '',
+      category: 'Found Items', // Default category
+      image: report.image || null
+    };
+    
+    // Show confirmation dialog
+    Swal.fire({
+      title: 'Add to Items?',
+      text: `Add "${newProductData.name}" to the items list?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, add it',
+      cancelButtonText: 'Cancel'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          setIsLoading(true);
+          
+          const token = getAuthToken();
+          if (!token) {
+            navigate('/login');
+            return;
+          }
+          
+          // Create form data for the new product
+          const formData = new FormData();
+          formData.append('name', newProductData.name);
+          formData.append('description', newProductData.description);
+          formData.append('category', newProductData.category);
+          
+          // If the report has an image, try to use it
+          if (newProductData.image && typeof newProductData.image === 'string' && newProductData.image.startsWith('http')) {
+            // If it's a URL, we need to fetch the image and convert it to a file
+            try {
+              const response = await fetch(newProductData.image);
+              const blob = await response.blob();
+              const file = new File([blob], 'reported-item.jpg', { type: 'image/jpeg' });
+              formData.append('image', file);
+            } catch (error) {
+              console.error('Error fetching image:', error);
+              // Continue without the image
+            }
+          } else if (newProductData.image instanceof File) {
+            formData.append('image', newProductData.image);
+          }
+          
+          // Send the request to create a new product
+          const response = await fetch(`${API_BASE_URL}/api/products`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            },
+            body: formData
+          });
+          
+          if (!response.ok) {
+            throw new Error('Failed to add item');
+          }
+          
+          // Refresh the products list
+          fetchData();
+          
+          // Show success message
+          Swal.fire('Success!', 'Item added successfully', 'success');
+          
+          // Update the report status to "Processed"
+          handleUpdateReportStatus(report._id, 'Processed');
+          
+        } catch (error) {
+          console.error('Error adding item:', error);
+          Swal.fire('Error!', error.message, 'error');
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    });
   };
 
   const renderDashboard = () => {
