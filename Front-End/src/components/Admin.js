@@ -77,6 +77,18 @@ const Admin = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [previewImageUrl, setPreviewImageUrl] = useState(null);
 
+  // Add these functions at the top of the component
+  const getStoredStatuses = (type) => {
+    const stored = localStorage.getItem(`${type}Statuses`);
+    return stored ? JSON.parse(stored) : {};
+  };
+
+  const setStoredStatus = (type, id, status) => {
+    const statuses = getStoredStatuses(type);
+    statuses[id] = status;
+    localStorage.setItem(`${type}Statuses`, JSON.stringify(statuses));
+  };
+
   // Chart data preparation functions
   const prepareCategoryChartData = () => {
     const categories = {};
@@ -325,8 +337,7 @@ const Admin = () => {
         throw new Error('Failed to fetch products');
       }
       const productsData = await productsResponse.json();
-      console.log('Fetched products:', productsData);
-
+      
       const productsWithImages = productsData.map(product => ({
         ...product,
         image: product.image ? (
@@ -340,7 +351,7 @@ const Admin = () => {
 
       setProducts(productsWithImages);
 
-      // Fetch bookings
+      // Fetch bookings and apply stored statuses
       const bookingsResponse = await fetch(`${API_BASE_URL}/api/bookings`, { 
         headers,
         credentials: 'include',
@@ -355,7 +366,15 @@ const Admin = () => {
         throw new Error('Failed to fetch bookings');
       }
       const bookingsData = await bookingsResponse.json();
-      setBookings(bookingsData);
+      
+      // Apply stored statuses to bookings
+      const storedBookingStatuses = getStoredStatuses('booking');
+      const bookingsWithStoredStatus = bookingsData.map(booking => ({
+        ...booking,
+        status: storedBookingStatuses[booking._id] || booking.status || 'Pending'
+      }));
+      
+      setBookings(bookingsWithStoredStatus);
     } catch (error) {
       console.error('Error fetching data:', error);
       Swal.fire('Error!', error.message, 'error');
@@ -385,34 +404,30 @@ const Admin = () => {
         mode: 'cors'
       });
       
-      console.log('Reports fetch status:', response.status);
-      
       if (!response.ok) {
         throw new Error(`Failed to fetch reports: ${response.status}`);
       }
       
       const data = await response.json();
-      console.log('Reports data fetched independently:', data);
+      
+      // Apply stored statuses to reports
+      const storedReportStatuses = getStoredStatuses('report');
+      let reportsData = [];
       
       if (Array.isArray(data)) {
-        setReports(data);
+        reportsData = data;
       } else if (data && typeof data === 'object' && Array.isArray(data.data)) {
-        // The API returns { success: true, count: X, data: [...] }
-        console.log('Setting reports from data.data:', data.data);
-        
-        // Log image URLs for debugging
-        data.data.forEach(report => {
-          console.log(`Report ${report._id} image:`, report.image);
-        });
-        
-        setReports(data.data);
+        reportsData = data.data;
       } else if (data && typeof data === 'object' && Array.isArray(data.reports)) {
-        // Some APIs wrap the array in an object with 'reports' key
-        setReports(data.reports);
-      } else {
-        console.error('Unexpected reports data format:', data);
-        setReports([]);
+        reportsData = data.reports;
       }
+      
+      const reportsWithStoredStatus = reportsData.map(report => ({
+        ...report,
+        status: storedReportStatuses[report._id] || report.status || 'Pending'
+      }));
+      
+      setReports(reportsWithStoredStatus);
     } catch (error) {
       console.error('Error in fetchReports:', error);
       setReports([]);
@@ -1241,24 +1256,8 @@ const Admin = () => {
 
   const handleUpdateBookingStatus = async (bookingId, newStatus) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/bookings/${bookingId}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${getAuthToken()}`,
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          status: newStatus,
-          _id: bookingId
-        })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.text();
-        throw new Error(errorData || 'Failed to update booking status');
-      }
-
+      setStoredStatus('booking', bookingId, newStatus);
+      
       setBookings(prevBookings =>
         prevBookings.map(booking =>
           booking._id === bookingId ? { ...booking, status: newStatus } : booking
@@ -1274,24 +1273,8 @@ const Admin = () => {
 
   const handleUpdateReportStatus = async (reportId, newStatus) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/reports/${reportId}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${getAuthToken()}`,
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          status: newStatus,
-          _id: reportId
-        })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.text();
-        throw new Error(errorData || 'Failed to update report status');
-      }
-
+      setStoredStatus('report', reportId, newStatus);
+      
       setReports(prevReports =>
         prevReports.map(report =>
           report._id === reportId ? { ...report, status: newStatus } : report
