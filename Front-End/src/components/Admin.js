@@ -34,10 +34,10 @@ import {
   PointElement,
   LineElement,
   RadialLinearScale,
-  Filler,
-  ChartDataLabels
+  Filler
 } from 'chart.js';
 import { Pie, Bar, Line, Doughnut, PolarArea } from 'react-chartjs-2';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 // Register Chart.js components
 ChartJS.register(
