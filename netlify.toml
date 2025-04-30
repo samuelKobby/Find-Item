@@ -1,6 +1,6 @@
 [build]
   base = "Front-End"
-  command = "CI=false npm run build"
+  command = "npm install && npm run build"
   publish = "build"
 
 [build.environment]
@@ -10,3 +10,4 @@
   from = "/*"
   to = "/index.html"
   status = 200
+
