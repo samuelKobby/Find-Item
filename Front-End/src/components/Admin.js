@@ -1111,24 +1111,19 @@ const Admin = () => {
                     <td>{report.finderContact}</td>
                     <td>{report.description}</td>
                     <td>
-                      <div className={`status-badge ${report.status?.toLowerCase() || 'pending'}`}>
-                        {report.status || 'Pending'}
-                      </div>
+                      <select
+                        className="status-select"
+                        value={report.status || 'Pending'}
+                        onChange={(e) => handleUpdateReportStatus(report._id, e.target.value)}
+                      >
+                        <option value="Pending">Pending</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Resolved">Resolved</option>
+                        <option value="Closed">Closed</option>
+                      </select>
                     </td>
                     <td>
                       <div className="admin-table-actions">
-                        <select
-                          value={report.status || 'Pending'}
-                          onChange={(e) => handleUpdateReportStatus(report._id, e.target.value)}
-                          className="admin-filter-select"
-                          style={{ marginRight: '8px' }}
-                        >
-                          <option value="Pending">Pending</option>
-                          <option value="In Progress">In Progress</option>
-                          <option value="Resolved">Resolved</option>
-                          <option value="Rejected">Rejected</option>
-                          <option value="Processed">Processed</option>
-                        </select>
                         <button
                           className="admin-action-button delete"
                           onClick={() => handleDeleteReport(report._id)}
@@ -1209,9 +1204,16 @@ const Admin = () => {
                     <td>{booking.eventTime}</td>
                     <td>{booking.eventLocation}</td>
                     <td>
-                      <div className="status-badge pending">
-                        Pending
-                      </div>
+                      <select
+                        className="status-select"
+                        value={booking.status || 'Pending'}
+                        onChange={(e) => handleUpdateBookingStatus(booking._id || booking.id, e.target.value)}
+                      >
+                        <option value="Pending">Pending</option>
+                        <option value="Confirmed">Confirmed</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Cancelled">Cancelled</option>
+                      </select>
                     </td>
                     <td>
                       <div className="admin-table-actions">
@@ -1237,15 +1239,42 @@ const Admin = () => {
     );
   };
 
-  const handleUpdateReportStatus = async (reportId, newStatus) => {
+  const handleUpdateBookingStatus = async (bookingId, newStatus) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/reports/${reportId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/bookings/${bookingId}/status`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${getAuthToken()}`,
           'Content-Type': 'application/json'
         },
-        credentials: 'include',
+        body: JSON.stringify({ status: newStatus })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update booking status');
+      }
+
+      setBookings(prevBookings =>
+        prevBookings.map(booking =>
+          booking._id === bookingId ? { ...booking, status: newStatus } : booking
+        )
+      );
+
+      Swal.fire('Success!', 'Booking status updated successfully', 'success');
+    } catch (error) {
+      console.error('Error updating booking status:', error);
+      Swal.fire('Error!', error.message, 'error');
+    }
+  };
+
+  const handleUpdateReportStatus = async (reportId, newStatus) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/reports/${reportId}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${getAuthToken()}`,
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify({ status: newStatus })
       });
 
@@ -1253,7 +1282,6 @@ const Admin = () => {
         throw new Error('Failed to update report status');
       }
 
-      // Update the reports state with the new status
       setReports(prevReports =>
         prevReports.map(report =>
           report._id === reportId ? { ...report, status: newStatus } : report
@@ -1263,128 +1291,8 @@ const Admin = () => {
       Swal.fire('Success!', 'Report status updated successfully', 'success');
     } catch (error) {
       console.error('Error updating report status:', error);
-      Swal.fire('Error!', error.message || 'Failed to update report status', 'error');
+      Swal.fire('Error!', error.message, 'error');
     }
-  };
-
-  const handleDeleteReport = async (reportId) => {
-    const result = await Swal.fire({
-      title: 'Are you sure?',
-      text: 'You will not be able to recover this report!',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, delete it!'
-    });
-
-    if (result.isConfirmed) {
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/reports/${reportId}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${getAuthToken()}`
-          },
-          credentials: 'include'
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to delete report');
-        }
-
-        setReports(reports.filter(report => report._id !== reportId));
-        Swal.fire('Deleted!', 'The report has been deleted.', 'success');
-      } catch (error) {
-        console.error('Error deleting report:', error);
-        Swal.fire('Error!', error.message || 'Failed to delete report', 'error');
-      }
-    }
-  };
-
-  const handleAddReportToProducts = (report) => {
-    console.log('Converting report to product:', report);
-    
-    // Create a new product from the report data
-    const newProductData = {
-      name: report.itemName || report.name,
-      description: report.description || '',
-      category: 'Found Items', // Default category
-      image: report.image || null
-    };
-    
-    // Show confirmation dialog
-    Swal.fire({
-      title: 'Add to Items?',
-      text: `Add "${newProductData.name}" to the items list?`,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, add it',
-      cancelButtonText: 'Cancel'
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          setIsLoading(true);
-          
-          const token = getAuthToken();
-          if (!token) {
-            navigate('/login');
-            return;
-          }
-          
-          // Create form data for the new product
-          const formData = new FormData();
-          formData.append('name', newProductData.name);
-          formData.append('description', newProductData.description);
-          formData.append('category', newProductData.category);
-          
-          // If the report has an image, try to use it
-          if (newProductData.image && typeof newProductData.image === 'string' && newProductData.image.startsWith('http')) {
-            // If it's a URL, we need to fetch the image and convert it to a file
-            try {
-              const response = await fetch(newProductData.image);
-              const blob = await response.blob();
-              const file = new File([blob], 'reported-item.jpg', { type: 'image/jpeg' });
-              formData.append('image', file);
-            } catch (error) {
-              console.error('Error fetching image:', error);
-              // Continue without the image
-            }
-          } else if (newProductData.image instanceof File) {
-            formData.append('image', newProductData.image);
-          }
-          
-          // Send the request to create a new product
-          const response = await fetch(`${API_BASE_URL}/api/products`, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${token}`
-            },
-            body: formData
-          });
-          
-          if (!response.ok) {
-            throw new Error('Failed to add item');
-          }
-          
-          // Refresh the products list
-          fetchData();
-          
-          // Show success message
-          Swal.fire('Success!', 'Item added successfully', 'success');
-          
-          // Update the report status to "Processed"
-          handleUpdateReportStatus(report._id, 'Processed');
-          
-        } catch (error) {
-          console.error('Error adding item:', error);
-          Swal.fire('Error!', error.message, 'error');
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    });
   };
 
   const renderDashboard = () => {
@@ -1555,6 +1463,126 @@ const Admin = () => {
     );
   };
 
+  const handleAddReportToProducts = (report) => {
+    console.log('Converting report to product:', report);
+    
+    // Create a new product from the report data
+    const newProductData = {
+      name: report.itemName || report.name,
+      description: report.description || '',
+      category: 'Found Items', // Default category
+      image: report.image || null
+    };
+    
+    // Show confirmation dialog
+    Swal.fire({
+      title: 'Add to Items?',
+      text: `Add "${newProductData.name}" to the items list?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, add it',
+      cancelButtonText: 'Cancel'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          setIsLoading(true);
+          
+          const token = getAuthToken();
+          if (!token) {
+            navigate('/login');
+            return;
+          }
+          
+          // Create form data for the new product
+          const formData = new FormData();
+          formData.append('name', newProductData.name);
+          formData.append('description', newProductData.description);
+          formData.append('category', newProductData.category);
+          
+          // If the report has an image, try to use it
+          if (newProductData.image && typeof newProductData.image === 'string' && newProductData.image.startsWith('http')) {
+            // If it's a URL, we need to fetch the image and convert it to a file
+            try {
+              const response = await fetch(newProductData.image);
+              const blob = await response.blob();
+              const file = new File([blob], 'reported-item.jpg', { type: 'image/jpeg' });
+              formData.append('image', file);
+            } catch (error) {
+              console.error('Error fetching image:', error);
+              // Continue without the image
+            }
+          } else if (newProductData.image instanceof File) {
+            formData.append('image', newProductData.image);
+          }
+          
+          // Send the request to create a new product
+          const response = await fetch(`${API_BASE_URL}/api/products`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            },
+            body: formData
+          });
+          
+          if (!response.ok) {
+            throw new Error('Failed to add item');
+          }
+          
+          // Refresh the products list
+          fetchData();
+          
+          // Show success message
+          Swal.fire('Success!', 'Item added successfully', 'success');
+          
+          // Update the report status to "Processed"
+          handleUpdateReportStatus(report._id, 'Processed');
+          
+        } catch (error) {
+          console.error('Error adding item:', error);
+          Swal.fire('Error!', error.message, 'error');
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    });
+  };
+
+  const handleDeleteReport = async (reportId) => {
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: 'You will not be able to recover this report!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/reports/${reportId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${getAuthToken()}`
+          },
+          credentials: 'include'
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to delete report');
+        }
+
+        setReports(reports.filter(report => report._id !== reportId));
+        Swal.fire('Deleted!', 'The report has been deleted.', 'success');
+      } catch (error) {
+        console.error('Error deleting report:', error);
+        Swal.fire('Error!', error.message || 'Failed to delete report', 'error');
+      }
+    }
+  };
+
   return (
     <div id="admin-main-container">
       <div id="admin-sidebar">
@@ -1613,6 +1641,49 @@ const Admin = () => {
       >
         <FontAwesomeIcon icon={faArrowUp} />
       </button>
+      <style>
+        {`
+          .status-select {
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+            font-size: 14px;
+            cursor: pointer;
+            transition: border-color 0.2s;
+          }
+
+          .status-select:hover {
+            border-color: #4f46e5;
+          }
+
+          .status-select:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+          }
+
+          /* Status colors */
+          .status-select option[value="Pending"] {
+            color: #f59e0b;
+          }
+
+          .status-select option[value="In Progress"],
+          .status-select option[value="Confirmed"] {
+            color: #3b82f6;
+          }
+
+          .status-select option[value="Resolved"],
+          .status-select option[value="Completed"] {
+            color: #10b981;
+          }
+
+          .status-select option[value="Closed"],
+          .status-select option[value="Cancelled"] {
+            color: #6b7280;
+          }
+        `}
+      </style>
     </div>
   );
 };
