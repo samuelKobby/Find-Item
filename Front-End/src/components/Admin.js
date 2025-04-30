@@ -1241,17 +1241,22 @@ const Admin = () => {
 
   const handleUpdateBookingStatus = async (bookingId, newStatus) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/bookings/${bookingId}/status`, {
-        method: 'PATCH',
+      const response = await fetch(`${API_BASE_URL}/api/bookings/${bookingId}`, {
+        method: 'PUT',
         headers: {
           'Authorization': `Bearer ${getAuthToken()}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ status: newStatus })
+        credentials: 'include',
+        body: JSON.stringify({
+          status: newStatus,
+          _id: bookingId
+        })
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update booking status');
+        const errorData = await response.text();
+        throw new Error(errorData || 'Failed to update booking status');
       }
 
       setBookings(prevBookings =>
@@ -1269,17 +1274,22 @@ const Admin = () => {
 
   const handleUpdateReportStatus = async (reportId, newStatus) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/reports/${reportId}/status`, {
-        method: 'PATCH',
+      const response = await fetch(`${API_BASE_URL}/api/reports/${reportId}`, {
+        method: 'PUT',
         headers: {
           'Authorization': `Bearer ${getAuthToken()}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ status: newStatus })
+        credentials: 'include',
+        body: JSON.stringify({
+          status: newStatus,
+          _id: reportId
+        })
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update report status');
+        const errorData = await response.text();
+        throw new Error(errorData || 'Failed to update report status');
       }
 
       setReports(prevReports =>
